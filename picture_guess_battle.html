@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>เกมทายภาพประลอง — แดง vs น้ำเงิน</title>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   :root{
     --red:#e23b4d; --red-dark:#a31226;
@@ -456,44 +456,64 @@ function startPlayerPeer(){
   show('display');
   document.getElementById('soloControls').style.display='none';
   renderDisplay({phase:'setup'});
+  if(typeof Peer==='undefined'){ playerOverlay('error','โหลดไลบรารีเชื่อมต่อไม่สำเร็จ — เช็กเน็ตแล้วรีเฟรช'); return; }
   newPlayerPeer();
 }
+let _peerTimer=null;
 function newPlayerPeer(){
+  playerOverlay('connecting');
   roomCode=(Math.floor(1000+Math.random()*9000)).toString();
   if(peer){ try{peer.destroy();}catch(e){} }
-  peer=new Peer('pbgame-'+roomCode);
-  peer.on('open',()=>{ showRoomCode(roomCode,false); });
+  try{ peer=new Peer('pbgame-'+roomCode); }
+  catch(e){ playerOverlay('error','สร้างห้องไม่ได้: '+e.message); return; }
+  clearTimeout(_peerTimer);
+  _peerTimer=setTimeout(()=>playerOverlay('error','เชื่อมเซิร์ฟเวอร์ไม่ได้ (timeout) — เน็ตอาจบล็อก'),12000);
+  peer.on('open',()=>{ clearTimeout(_peerTimer); playerOverlay('code'); });
   peer.on('error',err=>{
     const t=(err&&err.type)||'';
-    if(t==='unavailable-id'){ newPlayerPeer(); }            // รหัสซ้ำ → สุ่มใหม่
-    else { showRoomCode('····',false); console.warn(err); }
+    if(t==='unavailable-id'){ newPlayerPeer(); return; }    // รหัสซ้ำ → สุ่มใหม่
+    clearTimeout(_peerTimer); console.warn(err);
+    playerOverlay('error','เชื่อมไม่ได้: '+(t||err));
   });
+  peer.on('disconnected',()=>{ try{peer.reconnect();}catch(e){} });
   peer.on('connection',c=>{
     conn=c;
-    c.on('open',()=>{ showRoomCode(roomCode,true); });
+    c.on('open',()=>playerOverlay('connected'));
     c.on('data',snap=>{ if(snap&&snap.type!=='hello') renderDisplay(snap); });
-    c.on('close',()=>{ showRoomCode(roomCode,false); });
+    c.on('close',()=>playerOverlay('code'));
   });
 }
-function showRoomCode(code,connected){
-  const ov=document.getElementById('oWait');
-  ov.innerHTML = connected
-    ? '<div class="big">✅ มือถือเชื่อมแล้ว</div><div class="sm">รอแอดมินกดเริ่มเกม…</div>'
-    : '<div class="sm">เปิด “หน้าแอดมิน” บนมือถือ แล้วใส่รหัสนี้</div><div class="roomcode">'+code+'</div><div class="sm">รหัสห้อง · ต้องอยู่ WiFi/เน็ตเดียวกัน</div>';
+function playerOverlay(mode,msg){
+  const ov=document.getElementById('oWait'); ov.onclick=null;
+  if(mode==='connecting')
+    ov.innerHTML='<div class="big">⏳ กำลังเชื่อมเซิร์ฟเวอร์ห้อง…</div><div class="sm">รอ 2-3 วินาที</div>';
+  else if(mode==='code')
+    ov.innerHTML='<div class="sm">เปิด “หน้าแอดมิน” บนมือถือ แล้วใส่รหัสนี้</div><div class="roomcode">'+roomCode+'</div><div class="sm">รหัสห้อง · ต้องมีเน็ตทั้งสองเครื่อง</div>';
+  else if(mode==='connected')
+    ov.innerHTML='<div class="big">✅ มือถือเชื่อมแล้ว</div><div class="sm">รอแอดมินกดเริ่มเกม…</div>';
+  else { /* error */
+    ov.innerHTML='<div class="big" style="color:#ff6b6b">⚠ '+(msg||'เชื่อมไม่ได้')+'</div><div class="sm">👆 แตะที่นี่เพื่อลองใหม่</div>';
+    ov.onclick=()=>{ ov.onclick=null; newPlayerPeer(); };
+  }
   ov.classList.add('show');
 }
 
 /* ---- ADMIN (มือถือ): ใส่รหัส → เชื่อมจอผู้เล่น ---- */
+let _joinTimer=null;
 function joinRoom(){
   const code=((document.getElementById('joinCode').value)||'').trim();
   const st=document.getElementById('joinStatus');
   if(!/^\d{4}$/.test(code)){ st.textContent='ใส่รหัส 4 หลักให้ครบ'; return; }
+  if(typeof Peer==='undefined'){ st.textContent='โหลดไลบรารีไม่สำเร็จ — เช็กเน็ตแล้วรีเฟรช'; return; }
   st.textContent='กำลังเชื่อม…';
   if(peer){ try{peer.destroy();}catch(e){} }
-  peer=new Peer();
+  try{ peer=new Peer(); }catch(e){ st.textContent='เริ่มไม่ได้: '+e.message; return; }
+  clearTimeout(_joinTimer);
+  _joinTimer=setTimeout(()=>{ st.textContent='เชื่อมเซิร์ฟเวอร์ไม่ได้ (timeout) — กดเชื่อมต่อใหม่'; },12000);
   peer.on('open',()=>{
     conn=peer.connect('pbgame-'+code,{reliable:true});
     conn.on('open',()=>{
+      clearTimeout(_joinTimer);
       st.textContent='เชื่อมแล้ว ✓';
       const el=document.getElementById('connStatus'); el.textContent='หน้าจอผู้เล่น: เชื่อมแล้ว ✓'; el.classList.add('on');
       document.getElementById('setupSub').textContent='คุมเกมจากมือถือ · จอคอมโชว์ให้ผู้เล่นดู';
@@ -502,6 +522,7 @@ function joinRoom(){
     });
   });
   peer.on('error',err=>{
+    clearTimeout(_joinTimer);
     const t=(err&&err.type)||'';
     if(t==='peer-unavailable') st.textContent='ไม่พบห้องนี้ — เช็กรหัสบนจอคอมอีกครั้ง';
     else st.textContent='เชื่อมไม่ได้: '+(t||'ลองใหม่');
