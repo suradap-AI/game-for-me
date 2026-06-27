@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>เกมทายภาพประลอง — แดง vs น้ำเงิน</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   :root{
     --red:#e23b4d; --red-dark:#a31226;
@@ -70,6 +71,17 @@
   .startbtn:hover{filter:brightness(1.1);}
   .hint{font-size:12px; opacity:.5; text-align:center; margin-top:14px; line-height:1.6;}
 
+  /* ---------- JOIN (admin ใส่รหัสห้อง) ---------- */
+  #join .card{background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12);
+    border-radius:20px; padding:30px 28px; width:min(420px,92vw); text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);}
+  #join h1{font-size:24px; margin-bottom:6px;}
+  #join .sub{opacity:.65; margin-bottom:18px; font-size:14px; line-height:1.5;}
+  #join input{width:100%; padding:16px; font-size:38px; text-align:center; letter-spacing:14px;
+    border-radius:14px; border:2px solid var(--gold); background:rgba(0,0,0,.35); color:#fff;
+    margin-bottom:14px; font-weight:800;}
+  #join .back{margin-top:14px; font-size:13px; opacity:.6; cursor:pointer; text-decoration:underline;}
+
   /* ---------- DISPLAY (player & solo) ---------- */
   .stage{flex:1; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;}
   .stage .bg{position:absolute; inset:-40px; filter:blur(60px) saturate(1.4); opacity:.4; z-index:0;
@@ -122,6 +134,8 @@
   .overlay .big.red{color:var(--red);} .overlay .big.blue{color:var(--blue);}
   .overlay .mid{font-size:28px; opacity:.85;}
   .overlay .sm{font-size:18px; opacity:.6;}
+  .overlay .roomcode{font-size:96px; font-weight:900; letter-spacing:16px; color:var(--gold);
+    margin:18px 0; text-shadow:0 4px 30px rgba(212,175,55,.5);}
 
   /* solo controls */
   .controls{display:flex; gap:10px; padding:12px 14px; background:#06101f; justify-content:center; flex-wrap:wrap;}
@@ -226,20 +240,20 @@
   <h1>เกมทายภาพประลอง <span class="vs">แดง vs น้ำเงิน</span></h1>
   <div class="sub">เลือกว่าหน้าต่างนี้จะเป็นอะไร</div>
   <div class="role-row">
-    <div class="role" onclick="pickRole('admin')">
-      <div class="ic">🎮</div><div class="t">หน้าแอดมิน</div>
-      <div class="d">ตั้งค่า + คุมเกมที่นี่ (บนแล็ปท็อป)<br>เห็นเฉลย กดให้คะแนน/ข้าม</div>
-    </div>
     <div class="role" onclick="pickRole('player')">
-      <div class="ic">🖥️</div><div class="t">หน้าจอผู้เล่น</div>
-      <div class="d">ภาพใหญ่เต็มจอ ไม่มีปุ่ม<br>ลากไปจอใหญ่ แล้วกดเต็มจอ</div>
+      <div class="ic">🖥️</div><div class="t">หน้าจอผู้เล่น (คอม)</div>
+      <div class="d">เปิดบนคอม/จอใหญ่ที่ผู้เล่นดู<br>จะขึ้น <b>รหัสห้อง</b> ให้มือถือเชื่อม</div>
+    </div>
+    <div class="role" onclick="pickRole('admin')">
+      <div class="ic">🎮</div><div class="t">หน้าแอดมิน (มือถือ)</div>
+      <div class="d">ใส่รหัสห้องจากจอคอม → คุมเกม<br>เห็นเฉลย กดให้คะแนน/ข้าม</div>
     </div>
     <div class="role" onclick="pickRole('solo')">
       <div class="ic">📺</div><div class="t">จอเดียว</div>
-      <div class="d">รวมภาพ+ปุ่มในหน้าต่างเดียว<br>(โหมดเดิม ไม่แยกจอ)</div>
+      <div class="d">เล่นจบในเครื่องเดียว (มือถือ)<br>คุมด้วยโซนแตะซ่อน</div>
     </div>
   </div>
-  <div class="hint" style="margin-top:24px">เปิดหน้าแอดมินก่อน แล้วกดปุ่ม “เปิดหน้าจอผู้เล่น” เพื่อเปิดอีกหน้าต่างอัตโนมัติ</div>
+  <div class="hint" style="margin-top:24px">วิธีเล่นข้ามเครื่อง: เปิด “หน้าจอผู้เล่น” บนคอมก่อน → จะได้รหัสห้อง → เปิด “หน้าแอดมิน” บนมือถือ ใส่รหัสนั้น</div>
 </section>
 
 <!-- ============ SETUP (admin & solo) ============ -->
@@ -262,6 +276,19 @@
     </div>
     <button class="startbtn" onclick="startGame()">▶ เริ่มเกม</button>
     <div class="hint" id="setupHint"></div>
+  </div>
+</section>
+
+<!-- ============ JOIN (admin ใส่รหัสห้อง) ============ -->
+<section id="join" class="screen center">
+  <div class="card">
+    <h1>🎮 เชื่อมกับจอผู้เล่น</h1>
+    <div class="sub">เปิด “หน้าจอผู้เล่น” บนคอมก่อน<br>แล้วใส่ <b>รหัสห้อง 4 หลัก</b> ที่ขึ้นบนจอคอม</div>
+    <input id="joinCode" inputmode="numeric" maxlength="4" placeholder="0000"
+      onkeydown="if(event.key==='Enter')joinRoom()">
+    <button class="startbtn" onclick="joinRoom()">เชื่อมต่อ</button>
+    <div class="hint" id="joinStatus"></div>
+    <div class="back" onclick="location.reload()">← กลับไปเลือกโหมด</div>
   </div>
 </section>
 
@@ -335,7 +362,6 @@
     <div style="font-size:20px;font-weight:800">🎮 แผงควบคุมแอดมิน</div>
     <div style="display:flex;gap:10px;align-items:center">
       <span class="status" id="connStatus">หน้าจอผู้เล่น: ยังไม่เชื่อม</span>
-      <button class="ghost-btn" onclick="openPlayer()">🖥️ เปิดหน้าจอผู้เล่น ↗</button>
     </div>
   </div>
 
@@ -401,52 +427,85 @@ const DECKS = {
     {a:"มอเตอร์ไซค์",e:"🏍️"},{a:"รถดับเพลิง",e:"🚒"},{a:"แทรกเตอร์",e:"🚜"},{a:"รถตำรวจ",e:"🚓"}]
 };
 
-/* ============ TRANSPORT (sync ระหว่างหน้าต่าง) ============ */
-const KEY='pb_state';
-let CH=null; try{CH=new BroadcastChannel('picture-battle');}catch(e){}
-let ROLE=null, lastWrite=0;
+/* ============ TRANSPORT (cross-device sync ผ่าน WebRTC / PeerJS) ============
+   ADMIN (มือถือ) = สมองเกม ส่ง snapshot ผ่าน data channel
+   PLAYER (คอม)  = จดทะเบียนห้องด้วยรหัส 4 หลัก โชว์รหัส + รับ snapshot มาวาด     */
+let ROLE=null, peer=null, conn=null, roomCode=null, lastSend=0;
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
 function broadcast(snap){
-  const msg=JSON.stringify(snap);
-  if(CH) try{CH.postMessage(snap);}catch(e){}
+  if(ROLE!=='admin' || !conn || !conn.open) return;
   const now=performance.now();
-  if(snap._force || now-lastWrite>100){ lastWrite=now; try{localStorage.setItem(KEY,msg);}catch(e){} }
+  if(snap._force || now-lastSend>120){ lastSend=now; try{conn.send(snap);}catch(e){} }
 }
-function onIncoming(snap){
-  if(ROLE!=='player') return;
-  if(snap.type==='hello') return;
-  renderDisplay(snap);
-}
-if(CH) CH.onmessage=e=>{ if(e.data&&e.data.type==='hello'){ if(ROLE!=='player') pushState(true); } else onIncoming(e.data); };
-window.addEventListener('storage',e=>{ if(e.key===KEY&&e.newValue) onIncoming(JSON.parse(e.newValue)); });
 
-/* ============ ROLE / NAV ============ */
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function pickRole(r){
   ROLE=r;
-  if(r==='player'){
-    show('display');
-    document.getElementById('soloControls').style.display='none';
-    const s=localStorage.getItem(KEY);
-    renderDisplay(s?JSON.parse(s):{phase:'setup'});
-    if(CH) try{CH.postMessage({type:'hello'});}catch(e){}
-  } else {
-    document.getElementById('setupSub').textContent = r==='admin'
-      ? 'คุมเกมจากหน้านี้ · เปิดหน้าจอผู้เล่นแยกอีกหน้าต่าง'
-      : 'นาฬิกาหมากรุก · เวลาใครหมดก่อนแพ้ (จอเดียว)';
-    document.getElementById('setupHint').innerHTML = r==='admin'
-      ? 'หลังเริ่มเกม กด “เปิดหน้าจอผู้เล่น” เพื่อเปิดอีกหน้าต่างไปโชว์จอใหญ่'
-      : 'ปุ่มลัด: ←/A แดงถูก · →/L น้ำเงินถูก · เว้นวรรค ข้าม · P พัก';
+  if(r==='player'){ startPlayerPeer(); }
+  else if(r==='admin'){ show('join'); setTimeout(()=>{const j=document.getElementById('joinCode'); if(j) j.focus();},120); }
+  else { /* solo */
+    document.getElementById('setupSub').textContent='นาฬิกาหมากรุก · เวลาใครหมดก่อนแพ้ (จอเดียว)';
+    document.getElementById('setupHint').innerHTML='ปุ่มลัด: ←/A แดงถูก · →/L น้ำเงินถูก · เว้นวรรค ข้าม · P พัก';
     show('setup');
   }
 }
-/* auto player mode via ?view=player */
-if(new URLSearchParams(location.search).get('view')==='player'){ pickRole('player'); }
 
-function openPlayer(){
-  const url=location.href.split('#')[0].split('?')[0]+'?view=player';
-  const w=window.open(url,'pbPlayer','width=1280,height=800');
-  if(!w) alert('เบราว์เซอร์บล็อกป๊อปอัป — อนุญาตป๊อปอัปแล้วลองใหม่ หรือเปิดไฟล์อีกแท็บแล้วเลือก “หน้าจอผู้เล่น”');
+/* ---- PLAYER (คอม): สร้างห้อง + โชว์รหัส + รับ snapshot ---- */
+function startPlayerPeer(){
+  show('display');
+  document.getElementById('soloControls').style.display='none';
+  renderDisplay({phase:'setup'});
+  newPlayerPeer();
+}
+function newPlayerPeer(){
+  roomCode=(Math.floor(1000+Math.random()*9000)).toString();
+  if(peer){ try{peer.destroy();}catch(e){} }
+  peer=new Peer('pbgame-'+roomCode);
+  peer.on('open',()=>{ showRoomCode(roomCode,false); });
+  peer.on('error',err=>{
+    const t=(err&&err.type)||'';
+    if(t==='unavailable-id'){ newPlayerPeer(); }            // รหัสซ้ำ → สุ่มใหม่
+    else { showRoomCode('····',false); console.warn(err); }
+  });
+  peer.on('connection',c=>{
+    conn=c;
+    c.on('open',()=>{ showRoomCode(roomCode,true); });
+    c.on('data',snap=>{ if(snap&&snap.type!=='hello') renderDisplay(snap); });
+    c.on('close',()=>{ showRoomCode(roomCode,false); });
+  });
+}
+function showRoomCode(code,connected){
+  const ov=document.getElementById('oWait');
+  ov.innerHTML = connected
+    ? '<div class="big">✅ มือถือเชื่อมแล้ว</div><div class="sm">รอแอดมินกดเริ่มเกม…</div>'
+    : '<div class="sm">เปิด “หน้าแอดมิน” บนมือถือ แล้วใส่รหัสนี้</div><div class="roomcode">'+code+'</div><div class="sm">รหัสห้อง · ต้องอยู่ WiFi/เน็ตเดียวกัน</div>';
+  ov.classList.add('show');
+}
+
+/* ---- ADMIN (มือถือ): ใส่รหัส → เชื่อมจอผู้เล่น ---- */
+function joinRoom(){
+  const code=((document.getElementById('joinCode').value)||'').trim();
+  const st=document.getElementById('joinStatus');
+  if(!/^\d{4}$/.test(code)){ st.textContent='ใส่รหัส 4 หลักให้ครบ'; return; }
+  st.textContent='กำลังเชื่อม…';
+  if(peer){ try{peer.destroy();}catch(e){} }
+  peer=new Peer();
+  peer.on('open',()=>{
+    conn=peer.connect('pbgame-'+code,{reliable:true});
+    conn.on('open',()=>{
+      st.textContent='เชื่อมแล้ว ✓';
+      const el=document.getElementById('connStatus'); el.textContent='หน้าจอผู้เล่น: เชื่อมแล้ว ✓'; el.classList.add('on');
+      document.getElementById('setupSub').textContent='คุมเกมจากมือถือ · จอคอมโชว์ให้ผู้เล่นดู';
+      document.getElementById('setupHint').innerHTML='ปุ่มลัด: ←/A แดงถูก · →/L น้ำเงินถูก · เว้นวรรค ข้าม · P พัก';
+      show('setup');
+    });
+  });
+  peer.on('error',err=>{
+    const t=(err&&err.type)||'';
+    if(t==='peer-unavailable') st.textContent='ไม่พบห้องนี้ — เช็กรหัสบนจอคอมอีกครั้ง';
+    else st.textContent='เชื่อมไม่ได้: '+(t||'ลองใหม่');
+  });
 }
 
 /* ============ GAME LOGIC (admin & solo = brain) ============ */
@@ -635,13 +694,6 @@ function renderAdmin(s){
     document.getElementById('aCat').textContent=s.endReason;
   }
 }
-
-/* connection indicator: player says hello → admin lights up */
-if(CH) CH.addEventListener('message',e=>{
-  if(e.data&&e.data.type==='hello'&&ROLE==='admin'){
-    const el=document.getElementById('connStatus'); el.textContent='หน้าจอผู้เล่น: เชื่อมแล้ว ✓'; el.classList.add('on');
-  }
-});
 
 /* keyboard (admin & solo only) */
 document.addEventListener('keydown',e=>{
