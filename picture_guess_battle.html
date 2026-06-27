@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เกมทายภาพประลอง — แดง vs น้ำเงิน</title>
+<title>เกมทายภาพประลอง — ส้ม vs ฟ้า</title>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   :root{
-    --red:#e23b4d; --red-dark:#a31226;
-    --blue:#2a6df4; --blue-dark:#123a8f;
+    --red:#ff7a35; --red-dark:#c2531a;   /* ทีมส้ม (CI) */
+    --blue:#4A90D9; --blue-dark:#2c5d96; /* ทีมฟ้า (CI) */
     --gold:#f4c43b; --ink:#0a1530;
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-user-select:none; user-select:none;}
@@ -103,8 +103,8 @@
   .answer-reveal.show{opacity:1;}
   .flash{position:absolute; inset:0; z-index:4; pointer-events:none; opacity:0;}
   .flash.go{animation:flash .6s ease-out;}
-  .flash.red{background:radial-gradient(circle,rgba(226,59,77,.55),transparent 70%);}
-  .flash.blue{background:radial-gradient(circle,rgba(42,109,244,.55),transparent 70%);}
+  .flash.red{background:radial-gradient(circle,rgba(255,122,53,.55),transparent 70%);}
+  .flash.blue{background:radial-gradient(circle,rgba(74,144,217,.55),transparent 70%);}
   @keyframes flash{0%{opacity:1;}100%{opacity:0;}}
 
   .scoreboard{display:flex; align-items:stretch; height:120px; background:var(--ink); border-top:3px solid var(--gold);}
@@ -201,9 +201,9 @@
   .tapzones .tz .hint{opacity:0; transition:.25s; font-size:15px; font-weight:800; padding:7px 14px;
     border-radius:999px; border:2px dashed rgba(255,255,255,.6); white-space:nowrap;}
   .tapzones.hints .tz{border-left:1px dashed rgba(255,255,255,.22);}
-  .tapzones.hints .tz.red .hint{opacity:1; color:#fff; background:rgba(226,59,77,.55);}
+  .tapzones.hints .tz.red .hint{opacity:1; color:#fff; background:rgba(255,122,53,.6);}
   .tapzones.hints .tz.skip .hint{opacity:1; color:#fff; background:rgba(68,79,107,.7);}
-  .tapzones.hints .tz.blue .hint{opacity:1; color:#fff; background:rgba(42,109,244,.55);}
+  .tapzones.hints .tz.blue .hint{opacity:1; color:#fff; background:rgba(74,144,217,.6);}
 
   .gear{position:absolute; top:14px; left:14px; z-index:7; width:46px; height:46px; border-radius:50%;
     background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.3); color:#fff; font-size:22px;
@@ -216,6 +216,61 @@
   .gmenu button{padding:13px 14px; text-align:left; border:none; border-radius:10px; cursor:pointer;
     background:rgba(255,255,255,.06); color:#fff; font-size:15px; font-weight:600;}
   .gmenu button:hover{background:rgba(255,255,255,.14);}
+
+  /* ---------- TOURNAMENT DASHBOARD ---------- */
+  #tour{padding:16px; gap:14px; overflow:auto;}
+  #matchSetup{padding:16px; gap:14px; overflow:auto;}
+  .tour-h{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .tour-h .ti{font-size:20px; font-weight:800;}
+  .tour-h .ti .vs{color:var(--gold);}
+  .says{display:flex; gap:12px; flex-wrap:wrap;}
+  .say{flex:1; min-width:280px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12);
+    border-radius:16px; padding:14px 16px;}
+  .say h3{font-size:15px; letter-spacing:1px; opacity:.8; margin-bottom:10px;}
+  .stab{width:100%; border-collapse:collapse; font-size:14px;}
+  .stab th{font-size:11px; opacity:.55; text-align:left; font-weight:600; padding:4px 6px;}
+  .stab td{padding:7px 6px; border-top:1px solid rgba(255,255,255,.08); vertical-align:top;}
+  .stab td.w{font-weight:800; text-align:center; width:38px;}
+  .stab td.p{opacity:.7; text-align:center; width:46px;}
+  .stab tr.lead td{background:rgba(244,196,59,.12);}
+  .stab .gname{font-weight:700;}
+  .stab .gmem{font-size:11px; opacity:.55;}
+  .stab .qualified{color:var(--gold); font-size:11px; font-weight:800;}
+
+  .mtable{width:100%; border-collapse:collapse; font-size:13px;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); border-radius:14px; overflow:hidden;}
+  .mtable th{font-size:11px; opacity:.55; text-align:left; font-weight:600; padding:8px 10px; background:rgba(0,0,0,.2);}
+  .mtable td{padding:9px 10px; border-top:1px solid rgba(255,255,255,.08);}
+  .mtable tr.cur td{background:rgba(244,196,59,.14);}
+  .mtable .stg{font-size:11px; opacity:.6;}
+  .mtable .pair{font-weight:700;}
+  .mtable .o{color:var(--red);} .mtable .b{color:var(--blue);}
+  .mtable .res{font-weight:800;}
+  .mtable .pending{opacity:.4;}
+
+  .ms-pair{display:flex; align-items:center; gap:12px; justify-content:center; margin:6px 0 4px;}
+  .ms-side{flex:1; border-radius:14px; padding:14px; border:2px solid transparent; text-align:center;}
+  .ms-side.o{background:linear-gradient(180deg,rgba(255,122,53,.25),rgba(194,83,26,.12)); border-color:var(--red);}
+  .ms-side.b{background:linear-gradient(180deg,rgba(74,144,217,.25),rgba(44,93,150,.12)); border-color:var(--blue);}
+  .ms-side .tag{font-size:13px; font-weight:800; letter-spacing:1px;}
+  .ms-side .tag.o{color:var(--red);} .ms-side .tag.b{color:var(--blue);}
+  .ms-side .gp{font-size:16px; font-weight:800; margin:4px 0 8px;}
+  .ms-side select{width:100%; padding:10px; border-radius:10px; font-size:15px;
+    border:1px solid rgba(255,255,255,.2); background:rgba(0,0,0,.35); color:#fff;}
+  .ms-swap{font-size:24px; cursor:pointer; padding:8px; border-radius:50%; background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.2); flex:0 0 auto;}
+  .seg{display:flex; gap:8px;}
+  .seg button{flex:1; padding:12px; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer;
+    border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.05); color:#fff;}
+  .seg button.on{background:var(--gold); color:var(--ink); border-color:var(--gold);}
+
+  #tourEndBar{display:none; gap:12px;}
+  #tourEndBar.on{display:flex;}
+  #tourEndBar button{flex:1; padding:18px; font-size:18px; font-weight:800; border:none; border-radius:14px; cursor:pointer;
+    background:linear-gradient(90deg,var(--red),var(--blue)); color:#fff;}
+  .champ{text-align:center; padding:30px 16px; background:rgba(244,196,59,.12);
+    border:1px solid var(--gold); border-radius:18px;}
+  .champ .c1{font-size:18px; opacity:.7;} .champ .c2{font-size:34px; font-weight:900; color:var(--gold); margin-top:8px;}
 
   @media (max-width:760px){
     .media{font-size:38vh;} .media img{max-height:60vh;}
@@ -237,8 +292,8 @@
 
 <!-- ============ LANDING ============ -->
 <section id="landing" class="screen center active">
-  <h1>เกมทายภาพประลอง <span class="vs">แดง vs น้ำเงิน</span></h1>
-  <div class="sub">เลือกว่าหน้าต่างนี้จะเป็นอะไร</div>
+  <h1>เกมทายภาพประลอง <span class="vs">ส้ม vs ฟ้า</span></h1>
+  <div class="sub">ทัวร์นาเมนต์ทายภาพ · เลือกว่าหน้าต่างนี้จะเป็นอะไร</div>
   <div class="role-row">
     <div class="role" onclick="pickRole('player')">
       <div class="ic">🖥️</div><div class="t">หน้าจอผู้เล่น (คอม)</div>
@@ -246,7 +301,7 @@
     </div>
     <div class="role" onclick="pickRole('admin')">
       <div class="ic">🎮</div><div class="t">หน้าแอดมิน (มือถือ)</div>
-      <div class="d">ใส่รหัสห้องจากจอคอม → คุมเกม<br>เห็นเฉลย กดให้คะแนน/ข้าม</div>
+      <div class="d">ใส่รหัสห้องจากจอคอม → คุมทัวร์<br>จับคู่/ให้คะแนน/บันทึกผล</div>
     </div>
     <div class="role" onclick="pickRole('solo')">
       <div class="ic">📺</div><div class="t">จอเดียว</div>
@@ -259,16 +314,16 @@
 <!-- ============ SETUP (admin & solo) ============ -->
 <section id="setup" class="screen center">
   <div class="card">
-    <h1>ตั้งค่าเกม <span class="vs">แดง vs น้ำเงิน</span></h1>
+    <h1>ตั้งค่าเกม <span class="vs">ส้ม vs ฟ้า</span></h1>
     <div class="sub" id="setupSub">นาฬิกาหมากรุก · เวลาใครหมดก่อนแพ้</div>
     <div class="row">
-      <div class="field red"><label>ชื่อทีมแดง 🔴</label><input id="redName" value="ทีมแดง" maxlength="14"></div>
-      <div class="field blue"><label>ชื่อทีมน้ำเงิน 🔵</label><input id="blueName" value="ทีมน้ำเงิน" maxlength="14"></div>
+      <div class="field red"><label>ชื่อทีมส้ม 🟠</label><input id="redName" value="ทีมส้ม" maxlength="14"></div>
+      <div class="field blue"><label>ชื่อทีมฟ้า 🔵</label><input id="blueName" value="ทีมฟ้า" maxlength="14"></div>
     </div>
     <div class="row">
       <div class="field"><label>เวลาต่อคน (วินาที)</label><input id="timeBank" type="number" value="50" min="10" max="600"></div>
       <div class="field"><label>ใครเริ่มก่อน</label>
-        <select id="firstTurn"><option value="red">ทีมแดง</option><option value="blue">ทีมน้ำเงิน</option></select>
+        <select id="firstTurn"><option value="red">ทีมส้ม</option><option value="blue">ทีมฟ้า</option></select>
       </div>
     </div>
     <div class="field"><label>เลือกหมวด (เลือกได้หลายหมวด ระบบสุ่มผสมให้)</label>
@@ -297,17 +352,17 @@
   <div class="stage">
     <div class="bg" id="dBg"></div>
     <div class="cat-tag" id="dCatTag">หมวด</div>
-    <div class="turn-flag red" id="dFlagRed">🔴 ตาแดง</div>
-    <div class="turn-flag blue" id="dFlagBlue">🔵 ตาน้ำเงิน</div>
+    <div class="turn-flag red" id="dFlagRed">🟠 ตาส้ม</div>
+    <div class="turn-flag blue" id="dFlagBlue">🔵 ตาฟ้า</div>
     <div class="media" id="dMedia">🏳️</div>
     <div class="answer-reveal" id="dAnswer"></div>
     <div class="flash" id="dFlash"></div>
 
     <!-- โซนแตะซ่อน (solo / มือถือ) -->
     <div class="tapzones" id="tapzones">
-      <div class="tz red" onclick="tapZone('red')"><span class="hint">🔴 แตะ = แดงถูก</span></div>
+      <div class="tz red" onclick="tapZone('red')"><span class="hint">🟠 แตะ = ส้มถูก</span></div>
       <div class="tz skip" onclick="tapZone('skip')"><span class="hint">⏭ ข้าม</span></div>
-      <div class="tz blue" onclick="tapZone('blue')"><span class="hint">🔵 แตะ = น้ำเงินถูก</span></div>
+      <div class="tz blue" onclick="tapZone('blue')"><span class="hint">🔵 แตะ = ฟ้าถูก</span></div>
     </div>
     <div class="gear" id="gear" onclick="toggleMenu()">⚙</div>
     <div class="gmenu" id="gmenu">
@@ -331,7 +386,7 @@
 
   <div class="scoreboard">
     <div class="player red" id="dPRed">
-      <div class="pname" id="dRedName">ทีมแดง</div>
+      <div class="pname" id="dRedName">ทีมส้ม</div>
       <div class="pscore" id="dRedScore">0</div>
       <div class="clock" id="dRedClock"><div class="t" id="dRedTime">50</div><div class="lbl">เวลา</div></div>
     </div>
@@ -342,17 +397,17 @@
     <div class="player blue" id="dPBlue">
       <div class="clock" id="dBlueClock"><div class="t" id="dBlueTime">50</div><div class="lbl">เวลา</div></div>
       <div class="pscore" id="dBlueScore">0</div>
-      <div class="pname" id="dBlueName">ทีมน้ำเงิน</div>
+      <div class="pname" id="dBlueName">ทีมฟ้า</div>
     </div>
   </div>
 
   <!-- solo-only controls -->
   <div class="controls" id="soloControls" style="display:none">
-    <button class="btn-red" onclick="correct('red')">🔴 แดงตอบถูก<span class="kbd">← / A</span></button>
+    <button class="btn-red" onclick="correct('red')">🟠 ส้มตอบถูก<span class="kbd">← / A</span></button>
     <button class="btn-skip" onclick="skip()">⏭ ข้าม / เฉลย<span class="kbd">เว้นวรรค</span></button>
     <button class="btn-pause" id="soloPause" onclick="togglePause()">⏸ พัก<span class="kbd">P</span></button>
     <button class="btn-end" onclick="endGame('แอดมินจบเกม')">🏁 จบเกม</button>
-    <button class="btn-blue" onclick="correct('blue')">🔵 น้ำเงินตอบถูก<span class="kbd">→ / L</span></button>
+    <button class="btn-blue" onclick="correct('blue')">🔵 ฟ้าตอบถูก<span class="kbd">→ / L</span></button>
   </div>
 </section>
 
@@ -368,12 +423,12 @@
   <div class="admin-clocks">
     <div class="a-card red" id="aRedCard">
       <div class="turnbadge">ตาเล่น</div>
-      <div class="nm" id="aRedName">ทีมแดง</div>
+      <div class="nm" id="aRedName">ทีมส้ม</div>
       <div class="big"><div class="clk" id="aRedTime">50</div><div class="scr">แต้ม <b id="aRedScore">0</b></div></div>
     </div>
     <div class="a-card blue" id="aBlueCard">
       <div class="turnbadge">ตาเล่น</div>
-      <div class="nm" id="aBlueName">ทีมน้ำเงิน</div>
+      <div class="nm" id="aBlueName">ทีมฟ้า</div>
       <div class="big"><div class="clk" id="aBlueTime">50</div><div class="scr">แต้ม <b id="aBlueScore">0</b></div></div>
     </div>
   </div>
@@ -388,13 +443,74 @@
   </div>
 
   <div class="a-controls">
-    <button class="btn-red" onclick="correct('red')">🔴 แดงตอบถูก<span class="kbd">← / A</span></button>
-    <button class="btn-blue" onclick="correct('blue')">🔵 น้ำเงินตอบถูก<span class="kbd">→ / L</span></button>
+    <button class="btn-red" onclick="correct('red')">🟠 ส้มตอบถูก<span class="kbd">← / A</span></button>
+    <button class="btn-blue" onclick="correct('blue')">🔵 ฟ้าตอบถูก<span class="kbd">→ / L</span></button>
     <div class="wide">
       <button class="btn-skip" onclick="skip()">⏭ ข้าม / เฉลย<span class="kbd">เว้นวรรค</span></button>
       <button class="btn-pause" id="adminPause" onclick="togglePause()">⏸ พัก<span class="kbd">P</span></button>
       <button class="btn-end" onclick="endGame('แอดมินจบเกม')">🏁 จบเกม</button>
     </div>
+  </div>
+
+  <div id="tourEndBar">
+    <button onclick="finishMatch()">✅ บันทึกผล → แมตช์ถัดไป</button>
+  </div>
+</section>
+
+<!-- ============ TOURNAMENT DASHBOARD (admin) ============ -->
+<section id="tour" class="screen">
+  <div class="tour-h">
+    <div class="ti">🏆 ทัวร์นาเมนต์ <span class="vs">ส้ม vs ฟ้า</span></div>
+    <span class="status on" id="tourConn">เชื่อมจอแล้ว ✓</span>
+  </div>
+  <div class="says" id="tourSays"></div>
+  <div style="font-size:14px;opacity:.7;margin-top:4px">ตารางแมตช์</div>
+  <table class="mtable"><thead><tr><th>สาย</th><th>คู่แข่ง</th><th>ผล</th></tr></thead>
+    <tbody id="tourMatches"></tbody></table>
+  <div id="tourNextWrap"></div>
+  <div class="back" style="text-align:center;opacity:.5;font-size:12px;cursor:pointer" onclick="if(confirm('เริ่มทัวร์ใหม่ทั้งหมด? ผลทุกแมตช์จะถูกล้าง'))resetTournament()">↻ รีเซ็ตทัวร์นาเมนต์</div>
+</section>
+
+<!-- ============ MATCH SETUP (admin) ============ -->
+<section id="matchSetup" class="screen center">
+  <div class="card" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:22px 20px;width:min(620px,94vw);">
+    <h1 style="font-size:22px;text-align:center;margin-bottom:4px" id="msTitle">ตั้งค่าแมตช์</h1>
+    <div class="sub" style="text-align:center;opacity:.6;margin-bottom:16px;font-size:14px" id="msStage">สาย A · แมตช์ที่ 1</div>
+
+    <div class="ms-pair">
+      <div class="ms-side o" id="msSideO">
+        <div class="tag o">🟠 ทีมส้ม</div>
+        <div class="gp" id="msGpO">กลุ่ม —</div>
+        <select id="msPlayerO"></select>
+      </div>
+      <div class="ms-swap" onclick="swapColors()" title="สลับสี">⇄</div>
+      <div class="ms-side b" id="msSideB">
+        <div class="tag b">🔵 ทีมฟ้า</div>
+        <div class="gp" id="msGpB">กลุ่ม —</div>
+        <select id="msPlayerB"></select>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px"><label style="display:block;font-size:13px;opacity:.7;margin-bottom:6px">เวลาต่อฝั่ง</label>
+      <div class="seg" id="msTimeSeg">
+        <button data-t="45" onclick="pickTime(45)">45 วินาที</button>
+        <button data-t="50" class="on" onclick="pickTime(50)">50 วินาที</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px"><label style="display:block;font-size:13px;opacity:.7;margin-bottom:6px">ใครเริ่มก่อน</label>
+      <div class="seg" id="msFirstSeg">
+        <button data-f="red" class="on" onclick="pickFirst('red')">🟠 ส้มก่อน</button>
+        <button data-f="blue" onclick="pickFirst('blue')">🔵 ฟ้าก่อน</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px"><label style="display:block;font-size:13px;opacity:.7;margin-bottom:6px">เลือกหมวด (เลือกได้หลายหมวด)</label>
+      <div class="cats" id="msCats"></div>
+    </div>
+
+    <button class="startbtn" style="margin-top:18px" onclick="startTournamentMatch()">▶ เริ่มแมตช์</button>
+    <div class="back" style="text-align:center;margin-top:12px;font-size:13px;opacity:.6;cursor:pointer;text-decoration:underline" onclick="show('tour')">← กลับตารางทัวร์</div>
   </div>
 </section>
 
@@ -516,9 +632,9 @@ function joinRoom(){
       clearTimeout(_joinTimer);
       st.textContent='เชื่อมแล้ว ✓';
       const el=document.getElementById('connStatus'); el.textContent='หน้าจอผู้เล่น: เชื่อมแล้ว ✓'; el.classList.add('on');
-      document.getElementById('setupSub').textContent='คุมเกมจากมือถือ · จอคอมโชว์ให้ผู้เล่นดู';
-      document.getElementById('setupHint').innerHTML='ปุ่มลัด: ←/A แดงถูก · →/L น้ำเงินถูก · เว้นวรรค ข้าม · P พัก';
-      show('setup');
+      initTournament();
+      renderTour();
+      show('tour');
     });
   });
   peer.on('error',err=>{
@@ -549,7 +665,7 @@ function snapshot(extra){
     phase: !G?'setup':(G.ended?'ended':'playing'),
     item: it?{a:it.a,e:it.e||'',img:it.img||'',cat:it.cat}:null,
     reveal: G?G.revealing:false,
-    names: G?G.names:{red:'ทีมแดง',blue:'ทีมน้ำเงิน'},
+    names: G?G.names:{red:'ทีมส้ม',blue:'ทีมฟ้า'},
     score: G?G.score:{red:0,blue:0},
     time:  G?{red:Math.max(0,G.time.red),blue:Math.max(0,G.time.blue)}:{red:0,blue:0},
     turn:  G?G.turn:'red',
@@ -628,6 +744,7 @@ function endGame(reason,winner){
   if(!winner) winner=G.score.red===G.score.blue?'tie':(G.score.red>G.score.blue?'red':'blue');
   G.ended=true; G.winner=winner; G.endReason=reason;
   pushState(true);
+  if(G.tour) document.getElementById('tourEndBar').classList.add('on');
 }
 
 /* ============ TAP ZONES / GEAR MENU (solo) ============ */
@@ -648,7 +765,7 @@ function toggleSoloButtons(){
 /* ============ RENDER: DISPLAY (player & solo) ============ */
 function renderDisplay(s){
   s=s||{};
-  if(!s.names) s.names={red:'ทีมแดง',blue:'ทีมน้ำเงิน'};
+  if(!s.names) s.names={red:'ทีมส้ม',blue:'ทีมฟ้า'};
   if(!s.score) s.score={red:0,blue:0};
   if(!s.time)  s.time={red:0,blue:0};
   if(s.qNum==null) s.qNum=1;
@@ -720,6 +837,176 @@ function renderAdmin(s){
     document.getElementById('aAnswer').textContent = s.winner==='tie'?'เสมอ!':('🏆 '+s.names[s.winner]+' ชนะ');
     document.getElementById('aCat').textContent=s.endReason;
   }
+}
+
+/* ============ TOURNAMENT (admin) ============
+   6 กลุ่ม · ระบบสาย A/B · round-robin ในสาย · ที่ 1 ของสายเข้าชิง = 7 แมตช์
+   ตัดสินที่ 1 (แบบ X): นับแมตช์ชนะก่อน → เสมอ ตัดด้วยแต้มทายภาพรวมในสาย   */
+const GROUPS = {
+  1:{members:['ธาม','นิว','น้ำฝน']},
+  3:{members:['จีฟ','มิว','เบียร์','บอย']},
+  4:{members:['ปาล์ม','นาวา','แบงค์']},
+  5:{members:['อ้วน','เต็ม','ต้อง']},
+  6:{members:['ศร','ไอซ์','กันต์','เหมา']},
+  7:{members:['นัด','ภูมิ','เอิท','บีบี']},
+};
+const BRACKET = { A:[6,3,7], B:[4,5,1] };
+let TOUR=null, MS=null;
+
+function gName(g){ return 'กลุ่ม '+g; }
+function gMembers(g){ return GROUPS[g].members.join(', '); }
+function stageLabel(m){ return m.stage==='final'?'รอบชิงชนะเลิศ':'สาย '+m.stage; }
+
+function buildMatches(){
+  const rr=a=>[[a[0],a[1]],[a[0],a[2]],[a[1],a[2]]];
+  const list=[];
+  rr(BRACKET.A).forEach(p=>list.push({stage:'A',g1:p[0],g2:p[1]}));
+  rr(BRACKET.B).forEach(p=>list.push({stage:'B',g1:p[0],g2:p[1]}));
+  list.push({stage:'final',g1:null,g2:null});
+  list.forEach((m,i)=>{ m.id=i; m.done=false; m.winnerGroup=null; });
+  return list;
+}
+function saveTour(){ try{localStorage.setItem('pbgame_tour',JSON.stringify(TOUR));}catch(e){} }
+function loadTour(){ try{const s=localStorage.getItem('pbgame_tour'); return s?JSON.parse(s):null;}catch(e){return null;} }
+function initTournament(){ TOUR = loadTour() || {matches:buildMatches()}; }
+function resetTournament(){ TOUR={matches:buildMatches()}; saveTour(); renderTour(); show('tour'); }
+
+/* ---- standings (per สาย) ---- */
+function groupStats(say){
+  const st={}; BRACKET[say].forEach(g=>st[g]={wins:0,pts:0,played:0});
+  TOUR.matches.forEach(m=>{
+    if(m.stage!==say||!m.done) return;
+    const rg=m.colors.red, bg=m.colors.blue;
+    st[rg].pts+=m.scoreRed; st[rg].played++;
+    st[bg].pts+=m.scoreBlue; st[bg].played++;
+    if(m.winnerGroup===rg) st[rg].wins++; else if(m.winnerGroup===bg) st[bg].wins++;
+  });
+  return st;
+}
+function sayComplete(say){ return TOUR.matches.filter(m=>m.stage===say).every(m=>m.done); }
+function sayWinner(say){
+  if(!sayComplete(say)) return null;
+  const st=groupStats(say);
+  const arr=BRACKET[say].map(g=>({g,...st[g]})).sort((a,b)=>b.wins-a.wins||b.pts-a.pts);
+  const tie = arr.length>=2 && arr[0].wins===arr[1].wins && arr[0].pts===arr[1].pts;
+  return {g:arr[0].g, tie};
+}
+
+/* ---- render dashboard ---- */
+function renderTour(){
+  const says=document.getElementById('tourSays'); says.innerHTML='';
+  ['A','B'].forEach(s=>{
+    const st=groupStats(s), complete=sayComplete(s), win=sayWinner(s);
+    const arr=BRACKET[s].map(g=>({g,...st[g]})).sort((a,b)=>b.wins-a.wins||b.pts-a.pts);
+    const rows=arr.map(r=>{
+      const lead=complete&&win&&win.g===r.g;
+      return `<tr class="${lead?'lead':''}"><td><span class="gname">${gName(r.g)}</span> ${lead?'<span class="qualified">เข้าชิง</span>':''}<div class="gmem">${gMembers(r.g)}</div></td><td class="w">${r.wins}</td><td class="p">${r.pts}</td></tr>`;
+    }).join('');
+    says.insertAdjacentHTML('beforeend',
+      `<div class="say"><h3>สาย ${s}</h3><table class="stab"><thead><tr><th>กลุ่ม</th><th>ชนะ</th><th>แต้ม</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+  });
+  const tb=document.getElementById('tourMatches'); tb.innerHTML='';
+  const cur=TOUR.matches.find(m=>!m.done);
+  TOUR.matches.forEach(m=>{
+    let pair,res;
+    if(m.stage==='final'&&m.g1==null){
+      const wa=sayWinner('A'), wb=sayWinner('B');
+      pair=`<span class="pending">${wa?gName(wa.g):'ผู้ชนะสาย A'} พบ ${wb?gName(wb.g):'ผู้ชนะสาย B'}</span>`;
+    } else {
+      pair=`<span class="pair"><span class="o">${gName(m.g1)}</span> พบ <span class="b">${gName(m.g2)}</span></span>`;
+    }
+    if(m.done) res=`<span class="res">${gName(m.winnerGroup)} ชนะ</span> <span class="stg">(${m.scoreRed}-${m.scoreBlue})</span>`;
+    else if(cur&&cur.id===m.id) res='<span class="stg">▶ ถัดไป</span>';
+    else res='<span class="pending">—</span>';
+    tb.insertAdjacentHTML('beforeend',
+      `<tr class="${cur&&cur.id===m.id?'cur':''}"><td class="stg">${stageLabel(m)}</td><td>${pair}</td><td>${res}</td></tr>`);
+  });
+  const nw=document.getElementById('tourNextWrap'); nw.innerHTML='';
+  if(!cur){
+    const cg=TOUR.matches[TOUR.matches.length-1].winnerGroup;
+    nw.innerHTML=`<div class="champ"><div class="c1">🏆 แชมป์ทัวร์นาเมนต์</div><div class="c2">${gName(cg)}</div><div class="c1" style="margin-top:6px">${gMembers(cg)}</div></div>`;
+  } else if(cur.stage==='final'){
+    const wa=sayWinner('A'), wb=sayWinner('B');
+    if(wa&&wb){
+      const warn=(wa.tie||wb.tie)?'<div style="font-size:12px;color:#ffd27a;text-align:center;margin-bottom:8px">⚠ มีสายที่แต้มเสมอกัน ตรวจสอบก่อนเริ่ม</div>':'';
+      nw.innerHTML=warn+`<button class="startbtn" onclick="openMatchSetup(${cur.id})">▶ ตั้งค่ารอบชิงชนะเลิศ</button>`;
+    } else nw.innerHTML='<div style="text-align:center;opacity:.6;font-size:13px">เล่นรอบสายให้ครบก่อน เพื่อหาคู่ชิงชนะเลิศ</div>';
+  } else {
+    nw.innerHTML=`<button class="startbtn" onclick="openMatchSetup(${cur.id})">▶ ตั้งค่าแมตช์ถัดไป (สาย ${cur.stage})</button>`;
+  }
+}
+
+/* ---- match setup ---- */
+function openMatchSetup(matchId){
+  const m=TOUR.matches[matchId];
+  if(m.stage==='final'){
+    const wa=sayWinner('A'), wb=sayWinner('B');
+    if(!wa||!wb){ alert('รอบสายยังไม่ครบ'); return; }
+    m.g1=wa.g; m.g2=wb.g;
+  }
+  MS={matchId, gRed:m.g1, gBlue:m.g2, time:50, first:'red'};
+  renderMatchSetup();
+  show('matchSetup');
+}
+function swapColors(){ const t=MS.gRed; MS.gRed=MS.gBlue; MS.gBlue=t; renderMatchSetup(); }
+function pickTime(t){ MS.time=t; document.querySelectorAll('#msTimeSeg button').forEach(b=>b.classList.toggle('on',+b.dataset.t===t)); }
+function pickFirst(f){ MS.first=f; document.querySelectorAll('#msFirstSeg button').forEach(b=>b.classList.toggle('on',b.dataset.f===f)); }
+function fillPlayers(id,g){
+  const sel=document.getElementById(id); sel.innerHTML='';
+  GROUPS[g].members.forEach(mb=>{ const o=document.createElement('option'); o.value=mb; o.textContent=mb; sel.appendChild(o); });
+}
+function buildMSCats(){
+  const el=document.getElementById('msCats'); el.innerHTML='';
+  Object.keys(DECKS).forEach((c,i)=>{
+    const chip=document.createElement('div');
+    chip.className='cat-chip'+(i===0?' on':''); chip.textContent=c; chip.dataset.cat=c;
+    chip.onclick=()=>chip.classList.toggle('on'); el.appendChild(chip);
+  });
+}
+function renderMatchSetup(){
+  const m=TOUR.matches[MS.matchId];
+  document.getElementById('msTitle').textContent = m.stage==='final'?'รอบชิงชนะเลิศ':'ตั้งค่าแมตช์';
+  document.getElementById('msStage').textContent = stageLabel(m)+' · '+gName(MS.gRed)+' พบ '+gName(MS.gBlue);
+  document.getElementById('msGpO').textContent=gName(MS.gRed);
+  document.getElementById('msGpB').textContent=gName(MS.gBlue);
+  fillPlayers('msPlayerO',MS.gRed);
+  fillPlayers('msPlayerB',MS.gBlue);
+  document.querySelectorAll('#msTimeSeg button').forEach(b=>b.classList.toggle('on',+b.dataset.t===MS.time));
+  document.querySelectorAll('#msFirstSeg button').forEach(b=>b.classList.toggle('on',b.dataset.f===MS.first));
+  buildMSCats();
+}
+function startTournamentMatch(){
+  const chosen=[...document.querySelectorAll('#msCats .cat-chip.on')].map(c=>c.dataset.cat);
+  if(!chosen.length){ alert('เลือกอย่างน้อย 1 หมวด'); return; }
+  let pool=[]; chosen.forEach(c=>DECKS[c].forEach(it=>pool.push(Object.assign({cat:c},it)))); shuffle(pool);
+  const bank=MS.time*1000;
+  const pRed=document.getElementById('msPlayerO').value, pBlue=document.getElementById('msPlayerB').value;
+  G={pool,idx:0,
+     names:{red:pRed+' (ก.'+MS.gRed+')', blue:pBlue+' (ก.'+MS.gBlue+')'},
+     score:{red:0,blue:0}, time:{red:bank,blue:bank},
+     turn:MS.first, qNum:1, paused:false, revealing:false, ended:false, winner:null, endReason:'', last:performance.now(),
+     tour:{matchId:MS.matchId, gRed:MS.gRed, gBlue:MS.gBlue, pRed, pBlue}};
+  document.getElementById('tourEndBar').classList.remove('on');
+  show('admin');
+  pushState(true);
+  requestAnimationFrame(tick);
+}
+function finishMatch(){
+  if(!G||!G.ended||!G.tour) return;
+  if(G.winner==='tie'){ alert('ผลเสมอ — กดเล่นต่อ/ให้ตอบเพิ่มเพื่อหาผู้ชนะก่อนบันทึก'); return; }
+  const t=G.tour, m=TOUR.matches[t.matchId];
+  m.done=true;
+  m.colors={red:t.gRed, blue:t.gBlue};
+  m.players={red:t.pRed, blue:t.pBlue};
+  m.scoreRed=G.score.red; m.scoreBlue=G.score.blue;
+  m.winnerGroup = G.winner==='red'?t.gRed:t.gBlue;
+  m.loserGroup  = G.winner==='red'?t.gBlue:t.gRed;
+  m.endReason=G.endReason;
+  saveTour();
+  document.getElementById('tourEndBar').classList.remove('on');
+  G=null;
+  renderTour();
+  show('tour');
 }
 
 /* keyboard (admin & solo only) */
