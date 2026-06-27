@@ -647,6 +647,12 @@ function toggleSoloButtons(){
 
 /* ============ RENDER: DISPLAY (player & solo) ============ */
 function renderDisplay(s){
+  s=s||{};
+  if(!s.names) s.names={red:'ทีมแดง',blue:'ทีมน้ำเงิน'};
+  if(!s.score) s.score={red:0,blue:0};
+  if(!s.time)  s.time={red:0,blue:0};
+  if(s.qNum==null) s.qNum=1;
+  if(!s.turn)  s.turn='red';
   if(ROLE==='player'){ show('display'); document.getElementById('soloControls').style.display='none'; }
   const oWait=document.getElementById('oWait'), oPause=document.getElementById('oPause'), oEnd=document.getElementById('oEnd');
   oWait.classList.toggle('show', s.phase==='setup'||!s.item);
