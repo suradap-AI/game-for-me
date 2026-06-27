@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เกมทายภาพประลอง — แดง vs น้ำเงิน</title>
+<style>
+  :root{
+    --red:#e23b4d; --red-dark:#a31226;
+    --blue:#2a6df4; --blue-dark:#123a8f;
+    --gold:#f4c43b; --ink:#0a1530;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-user-select:none; user-select:none;}
+  html,body{height:100%;}
+  body{
+    font-family:"Segoe UI","Helvetica Neue",-apple-system,"Noto Sans Thai",sans-serif;
+    background:radial-gradient(circle at 50% -10%, #1b3a7a 0%, #0a1530 60%, #050b1c 100%);
+    color:#fff; overflow:hidden; touch-action:manipulation;
+  }
+  .screen{position:fixed; inset:0; display:none; flex-direction:column;}
+  .screen.active{display:flex;}
+  .center{align-items:center; justify-content:center;}
+
+  /* ---------- LANDING ---------- */
+  #landing{gap:18px; padding:30px; text-align:center;}
+  #landing h1{font-size:34px; letter-spacing:1px;}
+  #landing h1 .vs{color:var(--gold);}
+  #landing .sub{opacity:.6; margin-bottom:20px;}
+  .role-row{display:flex; gap:18px; flex-wrap:wrap; justify-content:center;}
+  .role{
+    width:240px; padding:28px 22px; border-radius:18px; cursor:pointer; transition:.15s;
+    border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.04);
+  }
+  .role:hover{transform:translateY(-4px); border-color:var(--gold);}
+  .role .ic{font-size:46px;}
+  .role .t{font-size:22px; font-weight:800; margin:10px 0 6px;}
+  .role .d{font-size:13px; opacity:.65; line-height:1.5;}
+
+  /* ---------- SETUP ---------- */
+  #setup{gap:22px; padding:30px; overflow:auto;}
+  #setup .card{
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12);
+    border-radius:20px; padding:34px 40px; width:min(760px,94vw);
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  #setup h1{font-size:30px; text-align:center; letter-spacing:1px; margin-bottom:4px;}
+  #setup h1 .vs{color:var(--gold);}
+  #setup .sub{text-align:center; opacity:.6; margin-bottom:24px; font-size:15px;}
+  .row{display:flex; gap:18px; flex-wrap:wrap; margin-bottom:18px;}
+  .field{flex:1; min-width:200px;}
+  .field label{display:block; font-size:13px; opacity:.7; margin-bottom:6px;}
+  .field input, .field select{
+    width:100%; padding:12px 14px; border-radius:12px; font-size:16px;
+    border:1px solid rgba(255,255,255,.18); background:rgba(0,0,0,.3); color:#fff;
+  }
+  .field.red input{border-color:var(--red);}
+  .field.blue input{border-color:var(--blue);}
+  .cats{display:flex; flex-wrap:wrap; gap:10px; margin-top:6px;}
+  .cat-chip{
+    padding:10px 16px; border-radius:999px; cursor:pointer; font-size:15px;
+    border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.05); transition:.15s;
+  }
+  .cat-chip.on{background:var(--gold); color:var(--ink); border-color:var(--gold); font-weight:700;}
+  .startbtn{
+    margin-top:20px; width:100%; padding:18px; font-size:22px; font-weight:800;
+    border:none; border-radius:14px; cursor:pointer; letter-spacing:1px;
+    background:linear-gradient(90deg,var(--red),var(--blue)); color:#fff;
+    box-shadow:0 10px 30px rgba(42,109,244,.4);
+  }
+  .startbtn:hover{filter:brightness(1.1);}
+  .hint{font-size:12px; opacity:.5; text-align:center; margin-top:14px; line-height:1.6;}
+
+  /* ---------- DISPLAY (player & solo) ---------- */
+  .stage{flex:1; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  .stage .bg{position:absolute; inset:-40px; filter:blur(60px) saturate(1.4); opacity:.4; z-index:0;
+    display:flex; align-items:center; justify-content:center; font-size:600px; line-height:1;}
+  .media{position:relative; z-index:1; display:flex; align-items:center; justify-content:center;
+    font-size:min(46vh,420px); line-height:1; filter:drop-shadow(0 14px 30px rgba(0,0,0,.55));}
+  .media img{max-height:78vh; max-width:88vw; border-radius:14px; box-shadow:0 14px 40px rgba(0,0,0,.6);}
+  .cat-tag{position:absolute; top:22px; left:50%; transform:translateX(-50%); z-index:2;
+    background:rgba(0,0,0,.45); padding:8px 22px; border-radius:999px; font-size:18px;
+    letter-spacing:1px; border:1px solid rgba(255,255,255,.15);}
+  .turn-flag{position:absolute; top:22px; z-index:2; padding:8px 22px; border-radius:10px;
+    font-weight:800; font-size:18px; letter-spacing:1px; animation:pulse 1s infinite;}
+  .turn-flag.red{right:22px; background:var(--red);}
+  .turn-flag.blue{left:22px; background:var(--blue);}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+  .answer-reveal{position:absolute; z-index:3; bottom:14px; left:50%; transform:translateX(-50%);
+    font-size:42px; font-weight:800; color:var(--gold); text-shadow:0 4px 14px rgba(0,0,0,.8);
+    opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap;}
+  .answer-reveal.show{opacity:1;}
+  .flash{position:absolute; inset:0; z-index:4; pointer-events:none; opacity:0;}
+  .flash.go{animation:flash .6s ease-out;}
+  .flash.red{background:radial-gradient(circle,rgba(226,59,77,.55),transparent 70%);}
+  .flash.blue{background:radial-gradient(circle,rgba(42,109,244,.55),transparent 70%);}
+  @keyframes flash{0%{opacity:1;}100%{opacity:0;}}
+
+  .scoreboard{display:flex; align-items:stretch; height:120px; background:var(--ink); border-top:3px solid var(--gold);}
+  .player{flex:1; display:flex; align-items:center; gap:18px; padding:0 26px; position:relative;}
+  .player.red{background:linear-gradient(180deg,var(--red),var(--red-dark));}
+  .player.blue{background:linear-gradient(180deg,var(--blue),var(--blue-dark)); justify-content:flex-end;}
+  .player.dim{filter:brightness(.5) saturate(.7);}
+  .player.active{box-shadow:inset 0 0 0 4px var(--gold);}
+  .pname{font-size:26px; font-weight:800; letter-spacing:1px;}
+  .pscore{font-size:54px; font-weight:900; font-variant-numeric:tabular-nums; line-height:1;}
+  .clock{display:flex; flex-direction:column; align-items:center; min-width:120px;
+    background:rgba(0,0,0,.35); border-radius:12px; padding:8px 14px;}
+  .clock .t{font-size:40px; font-weight:900; font-variant-numeric:tabular-nums; line-height:1;}
+  .clock .lbl{font-size:11px; opacity:.7; letter-spacing:1px;}
+  .clock.low .t{color:#ff6b6b; animation:pulse .6s infinite;}
+  .center-plate{width:230px; background:#081026; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:6px; border-left:2px solid rgba(255,255,255,.1);
+    border-right:2px solid rgba(255,255,255,.1);}
+  .qcount{font-size:14px; opacity:.6; letter-spacing:1px;}
+
+  /* waiting / paused / ended overlays on display */
+  .overlay{position:absolute; inset:0; z-index:6; display:none; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; text-align:center;
+    background:rgba(5,11,28,.92); backdrop-filter:blur(4px);}
+  .overlay.show{display:flex;}
+  .overlay .big{font-size:54px; font-weight:900;}
+  .overlay .big.red{color:var(--red);} .overlay .big.blue{color:var(--blue);}
+  .overlay .mid{font-size:28px; opacity:.85;}
+  .overlay .sm{font-size:18px; opacity:.6;}
+
+  /* solo controls */
+  .controls{display:flex; gap:10px; padding:12px 14px; background:#06101f; justify-content:center; flex-wrap:wrap;}
+  .controls button{padding:14px 22px; font-size:17px; font-weight:800; border:none; border-radius:12px;
+    cursor:pointer; letter-spacing:.5px; transition:.12s;}
+  .controls button:hover{transform:translateY(-2px);}
+  .btn-red{background:var(--red); color:#fff;}
+  .btn-blue{background:var(--blue); color:#fff;}
+  .btn-skip{background:#444f6b; color:#fff;}
+  .btn-pause{background:var(--gold); color:var(--ink);}
+  .btn-end{background:#222; color:#fff; border:1px solid #555 !important;}
+  .controls .kbd{font-size:11px; opacity:.55; display:block; margin-top:3px; font-weight:500;}
+
+  /* ---------- ADMIN PANEL ---------- */
+  #admin{padding:18px; gap:14px;}
+  .admin-top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+  .status{font-size:13px; padding:6px 14px; border-radius:999px; background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.15);}
+  .status.on{background:rgba(46,200,120,.18); border-color:#2ec878; color:#7df0b0;}
+  .ghost-btn{padding:8px 16px; border-radius:10px; border:1px solid var(--gold); background:transparent;
+    color:var(--gold); font-weight:700; cursor:pointer; font-size:14px;}
+  .ghost-btn:hover{background:var(--gold); color:var(--ink);}
+
+  .admin-clocks{display:flex; gap:14px;}
+  .a-card{flex:1; border-radius:16px; padding:16px 18px; position:relative; overflow:hidden;
+    border:2px solid transparent;}
+  .a-card.red{background:linear-gradient(180deg,rgba(226,59,77,.25),rgba(163,18,38,.15));}
+  .a-card.blue{background:linear-gradient(180deg,rgba(42,109,244,.25),rgba(18,58,143,.15));}
+  .a-card.turn{border-color:var(--gold); box-shadow:0 0 24px rgba(244,196,59,.35);}
+  .a-card .nm{font-size:18px; font-weight:800; opacity:.9;}
+  .a-card .big{display:flex; align-items:baseline; gap:18px; margin-top:6px;}
+  .a-card .clk{font-size:52px; font-weight:900; font-variant-numeric:tabular-nums; line-height:1;}
+  .a-card .clk.low{color:#ff6b6b;}
+  .a-card .scr{font-size:22px; opacity:.8;} .a-card .scr b{font-size:30px;}
+  .a-card .turnbadge{position:absolute; top:12px; right:14px; font-size:12px; font-weight:800;
+    background:var(--gold); color:var(--ink); padding:3px 10px; border-radius:999px; display:none;}
+  .a-card.turn .turnbadge{display:block;}
+
+  .a-ref{display:flex; align-items:center; gap:18px; background:rgba(0,0,0,.3);
+    border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:14px 20px;}
+  .a-ref .thumb{font-size:64px; line-height:1;}
+  .a-ref .thumb img{height:64px; border-radius:8px;}
+  .a-ref .info{flex:1;}
+  .a-ref .info .cat{font-size:14px; opacity:.6; letter-spacing:1px;}
+  .a-ref .info .ans{font-size:36px; font-weight:900; color:var(--gold); line-height:1.1;}
+  .a-ref .qn{font-size:14px; opacity:.6;}
+
+  .a-controls{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .a-controls .wide{grid-column:1 / -1; display:flex; gap:12px;}
+  .a-controls .wide button{flex:1;}
+  .a-controls button{padding:20px; font-size:20px; font-weight:800; border:none; border-radius:14px;
+    cursor:pointer; transition:.12s;}
+  .a-controls button:hover{transform:translateY(-2px);}
+  .a-controls .kbd{font-size:12px; opacity:.6; display:block; margin-top:4px; font-weight:500;}
+
+  /* ---------- TAP ZONES (solo / มือถือ) ---------- */
+  .tapzones{position:absolute; inset:0; z-index:5; display:none;}
+  .tapzones.on{display:flex;}
+  .tapzones .tz{flex:1; display:flex; align-items:flex-start; justify-content:center;
+    padding-top:16px; -webkit-tap-highlight-color:transparent;}
+  .tapzones .tz.skip{flex:.6;}
+  .tapzones .tz:active{background:rgba(255,255,255,.07);}
+  .tapzones .tz .hint{opacity:0; transition:.25s; font-size:15px; font-weight:800; padding:7px 14px;
+    border-radius:999px; border:2px dashed rgba(255,255,255,.6); white-space:nowrap;}
+  .tapzones.hints .tz{border-left:1px dashed rgba(255,255,255,.22);}
+  .tapzones.hints .tz.red .hint{opacity:1; color:#fff; background:rgba(226,59,77,.55);}
+  .tapzones.hints .tz.skip .hint{opacity:1; color:#fff; background:rgba(68,79,107,.7);}
+  .tapzones.hints .tz.blue .hint{opacity:1; color:#fff; background:rgba(42,109,244,.55);}
+
+  .gear{position:absolute; top:14px; left:14px; z-index:7; width:46px; height:46px; border-radius:50%;
+    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.3); color:#fff; font-size:22px;
+    display:none; align-items:center; justify-content:center; cursor:pointer;}
+  .gear.on{display:flex;}
+  .gmenu{position:absolute; top:68px; left:14px; z-index:8; background:#0e1b3a;
+    border:1px solid rgba(255,255,255,.2); border-radius:14px; padding:8px; display:none;
+    flex-direction:column; gap:6px; min-width:210px; box-shadow:0 12px 30px rgba(0,0,0,.5);}
+  .gmenu.on{display:flex;}
+  .gmenu button{padding:13px 14px; text-align:left; border:none; border-radius:10px; cursor:pointer;
+    background:rgba(255,255,255,.06); color:#fff; font-size:15px; font-weight:600;}
+  .gmenu button:hover{background:rgba(255,255,255,.14);}
+
+  @media (max-width:760px){
+    .media{font-size:38vh;} .media img{max-height:60vh;}
+    .pname{font-size:16px;} .pscore{font-size:30px;}
+    .clock{min-width:70px; padding:5px 8px;} .clock .t{font-size:24px;} .clock .lbl{font-size:9px;}
+    .player{gap:8px; padding:0 12px;} .scoreboard{height:84px;}
+    .center-plate{width:96px;} .center-plate div:last-child{font-size:9px !important;}
+    .cat-tag{font-size:13px; padding:5px 12px; top:14px;}
+    .turn-flag{font-size:13px; padding:5px 11px; top:14px;}
+    .answer-reveal{font-size:26px;}
+    #landing h1{font-size:24px;} #landing .role{width:90vw;}
+    #setup .card{padding:22px 18px;} #setup h1{font-size:22px;}
+    .a-controls button{padding:16px; font-size:17px;}
+    .a-card .clk{font-size:40px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<section id="landing" class="screen center active">
+  <h1>เกมทายภาพประลอง <span class="vs">แดง vs น้ำเงิน</span></h1>
+  <div class="sub">เลือกว่าหน้าต่างนี้จะเป็นอะไร</div>
+  <div class="role-row">
+    <div class="role" onclick="pickRole('admin')">
+      <div class="ic">🎮</div><div class="t">หน้าแอดมิน</div>
+      <div class="d">ตั้งค่า + คุมเกมที่นี่ (บนแล็ปท็อป)<br>เห็นเฉลย กดให้คะแนน/ข้าม</div>
+    </div>
+    <div class="role" onclick="pickRole('player')">
+      <div class="ic">🖥️</div><div class="t">หน้าจอผู้เล่น</div>
+      <div class="d">ภาพใหญ่เต็มจอ ไม่มีปุ่ม<br>ลากไปจอใหญ่ แล้วกดเต็มจอ</div>
+    </div>
+    <div class="role" onclick="pickRole('solo')">
+      <div class="ic">📺</div><div class="t">จอเดียว</div>
+      <div class="d">รวมภาพ+ปุ่มในหน้าต่างเดียว<br>(โหมดเดิม ไม่แยกจอ)</div>
+    </div>
+  </div>
+  <div class="hint" style="margin-top:24px">เปิดหน้าแอดมินก่อน แล้วกดปุ่ม “เปิดหน้าจอผู้เล่น” เพื่อเปิดอีกหน้าต่างอัตโนมัติ</div>
+</section>
+
+<!-- ============ SETUP (admin & solo) ============ -->
+<section id="setup" class="screen center">
+  <div class="card">
+    <h1>ตั้งค่าเกม <span class="vs">แดง vs น้ำเงิน</span></h1>
+    <div class="sub" id="setupSub">นาฬิกาหมากรุก · เวลาใครหมดก่อนแพ้</div>
+    <div class="row">
+      <div class="field red"><label>ชื่อทีมแดง 🔴</label><input id="redName" value="ทีมแดง" maxlength="14"></div>
+      <div class="field blue"><label>ชื่อทีมน้ำเงิน 🔵</label><input id="blueName" value="ทีมน้ำเงิน" maxlength="14"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>เวลาต่อคน (วินาที)</label><input id="timeBank" type="number" value="50" min="10" max="600"></div>
+      <div class="field"><label>ใครเริ่มก่อน</label>
+        <select id="firstTurn"><option value="red">ทีมแดง</option><option value="blue">ทีมน้ำเงิน</option></select>
+      </div>
+    </div>
+    <div class="field"><label>เลือกหมวด (เลือกได้หลายหมวด ระบบสุ่มผสมให้)</label>
+      <div class="cats" id="cats"></div>
+    </div>
+    <button class="startbtn" onclick="startGame()">▶ เริ่มเกม</button>
+    <div class="hint" id="setupHint"></div>
+  </div>
+</section>
+
+<!-- ============ DISPLAY (player & solo) ============ -->
+<section id="display" class="screen">
+  <div class="stage">
+    <div class="bg" id="dBg"></div>
+    <div class="cat-tag" id="dCatTag">หมวด</div>
+    <div class="turn-flag red" id="dFlagRed">🔴 ตาแดง</div>
+    <div class="turn-flag blue" id="dFlagBlue">🔵 ตาน้ำเงิน</div>
+    <div class="media" id="dMedia">🏳️</div>
+    <div class="answer-reveal" id="dAnswer"></div>
+    <div class="flash" id="dFlash"></div>
+
+    <!-- โซนแตะซ่อน (solo / มือถือ) -->
+    <div class="tapzones" id="tapzones">
+      <div class="tz red" onclick="tapZone('red')"><span class="hint">🔴 แตะ = แดงถูก</span></div>
+      <div class="tz skip" onclick="tapZone('skip')"><span class="hint">⏭ ข้าม</span></div>
+      <div class="tz blue" onclick="tapZone('blue')"><span class="hint">🔵 แตะ = น้ำเงินถูก</span></div>
+    </div>
+    <div class="gear" id="gear" onclick="toggleMenu()">⚙</div>
+    <div class="gmenu" id="gmenu">
+      <button onclick="toggleHints()">👁 แสดง/ซ่อน เส้นโซนแตะ</button>
+      <button onclick="toggleSoloButtons()">🔘 แสดง/ซ่อน ปุ่มด้านล่าง</button>
+      <button onclick="togglePause();closeMenu()">⏸ พัก / เล่นต่อ</button>
+      <button onclick="endGame('แอดมินจบเกม');closeMenu()">🏁 จบเกม</button>
+    </div>
+
+    <div class="overlay" id="oWait">
+      <div class="big">⏳ รอแอดมินเริ่มเกม…</div>
+      <div class="sm">หน้าต่างนี้คือจอผู้เล่น ลากไปจอใหญ่แล้วกดเต็มจอได้เลย</div>
+    </div>
+    <div class="overlay" id="oPause"><div class="big">⏸ พักเกม</div></div>
+    <div class="overlay" id="oEnd">
+      <div class="big" id="oEndWinner">ผู้ชนะ</div>
+      <div class="mid" id="oEndScore"></div>
+      <div class="sm" id="oEndReason"></div>
+    </div>
+  </div>
+
+  <div class="scoreboard">
+    <div class="player red" id="dPRed">
+      <div class="pname" id="dRedName">ทีมแดง</div>
+      <div class="pscore" id="dRedScore">0</div>
+      <div class="clock" id="dRedClock"><div class="t" id="dRedTime">50</div><div class="lbl">เวลา</div></div>
+    </div>
+    <div class="center-plate">
+      <div class="qcount" id="dQCount">ข้อ 1</div>
+      <div style="font-size:13px;opacity:.5;letter-spacing:1px;">PICTURE BATTLE</div>
+    </div>
+    <div class="player blue" id="dPBlue">
+      <div class="clock" id="dBlueClock"><div class="t" id="dBlueTime">50</div><div class="lbl">เวลา</div></div>
+      <div class="pscore" id="dBlueScore">0</div>
+      <div class="pname" id="dBlueName">ทีมน้ำเงิน</div>
+    </div>
+  </div>
+
+  <!-- solo-only controls -->
+  <div class="controls" id="soloControls" style="display:none">
+    <button class="btn-red" onclick="correct('red')">🔴 แดงตอบถูก<span class="kbd">← / A</span></button>
+    <button class="btn-skip" onclick="skip()">⏭ ข้าม / เฉลย<span class="kbd">เว้นวรรค</span></button>
+    <button class="btn-pause" id="soloPause" onclick="togglePause()">⏸ พัก<span class="kbd">P</span></button>
+    <button class="btn-end" onclick="endGame('แอดมินจบเกม')">🏁 จบเกม</button>
+    <button class="btn-blue" onclick="correct('blue')">🔵 น้ำเงินตอบถูก<span class="kbd">→ / L</span></button>
+  </div>
+</section>
+
+<!-- ============ ADMIN PANEL ============ -->
+<section id="admin" class="screen">
+  <div class="admin-top">
+    <div style="font-size:20px;font-weight:800">🎮 แผงควบคุมแอดมิน</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <span class="status" id="connStatus">หน้าจอผู้เล่น: ยังไม่เชื่อม</span>
+      <button class="ghost-btn" onclick="openPlayer()">🖥️ เปิดหน้าจอผู้เล่น ↗</button>
+    </div>
+  </div>
+
+  <div class="admin-clocks">
+    <div class="a-card red" id="aRedCard">
+      <div class="turnbadge">ตาเล่น</div>
+      <div class="nm" id="aRedName">ทีมแดง</div>
+      <div class="big"><div class="clk" id="aRedTime">50</div><div class="scr">แต้ม <b id="aRedScore">0</b></div></div>
+    </div>
+    <div class="a-card blue" id="aBlueCard">
+      <div class="turnbadge">ตาเล่น</div>
+      <div class="nm" id="aBlueName">ทีมน้ำเงิน</div>
+      <div class="big"><div class="clk" id="aBlueTime">50</div><div class="scr">แต้ม <b id="aBlueScore">0</b></div></div>
+    </div>
+  </div>
+
+  <div class="a-ref">
+    <div class="thumb" id="aThumb">🏳️</div>
+    <div class="info">
+      <div class="cat" id="aCat">หมวด</div>
+      <div class="ans" id="aAnswer">—</div>
+    </div>
+    <div class="qn" id="aQCount">ข้อ 1</div>
+  </div>
+
+  <div class="a-controls">
+    <button class="btn-red" onclick="correct('red')">🔴 แดงตอบถูก<span class="kbd">← / A</span></button>
+    <button class="btn-blue" onclick="correct('blue')">🔵 น้ำเงินตอบถูก<span class="kbd">→ / L</span></button>
+    <div class="wide">
+      <button class="btn-skip" onclick="skip()">⏭ ข้าม / เฉลย<span class="kbd">เว้นวรรค</span></button>
+      <button class="btn-pause" id="adminPause" onclick="togglePause()">⏸ พัก<span class="kbd">P</span></button>
+      <button class="btn-end" onclick="endGame('แอดมินจบเกม')">🏁 จบเกม</button>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ============ DECKS (แก้/เพิ่มได้ตรงนี้) ============
+   แต่ละ item:  {a:"คำตอบ", e:"emoji"}  หรือใส่ภาพจริง {a:"คำตอบ", img:"path/รูป.jpg"}  */
+const DECKS = {
+  "ธงประเทศ":[
+    {a:"ไทย",e:"🇹🇭"},{a:"ญี่ปุ่น",e:"🇯🇵"},{a:"ฝรั่งเศส",e:"🇫🇷"},{a:"บราซิล",e:"🇧🇷"},
+    {a:"อังกฤษ",e:"🇬🇧"},{a:"เกาหลีใต้",e:"🇰🇷"},{a:"สหรัฐฯ",e:"🇺🇸"},{a:"อิตาลี",e:"🇮🇹"},
+    {a:"แคนาดา",e:"🇨🇦"},{a:"เยอรมนี",e:"🇩🇪"},{a:"อินเดีย",e:"🇮🇳"},{a:"จีน",e:"🇨🇳"},
+    {a:"สเปน",e:"🇪🇸"},{a:"สวิตเซอร์แลนด์",e:"🇨🇭"},{a:"ออสเตรเลีย",e:"🇦🇺"},{a:"เม็กซิโก",e:"🇲🇽"}],
+  "อาหาร":[
+    {a:"แอปเปิล",e:"🍎"},{a:"พิซซ่า",e:"🍕"},{a:"ซูชิ",e:"🍣"},{a:"เบอร์เกอร์",e:"🍔"},
+    {a:"ราเมง",e:"🍜"},{a:"ครัวซองต์",e:"🥐"},{a:"ทาโก้",e:"🌮"},{a:"ไอศกรีม",e:"🍦"},
+    {a:"โดนัท",e:"🍩"},{a:"สลัด",e:"🥗"},{a:"พาสต้า",e:"🍝"},{a:"กุ้ง",e:"🍤"},
+    {a:"เค้ก",e:"🍰"},{a:"ข้าวปั้น",e:"🍙"},{a:"ไก่ทอด",e:"🍗"},{a:"แพนเค้ก",e:"🥞"}],
+  "สัตว์":[
+    {a:"หมา",e:"🐶"},{a:"แมว",e:"🐱"},{a:"สิงโต",e:"🦁"},{a:"ช้าง",e:"🐘"},
+    {a:"เพนกวิน",e:"🐧"},{a:"ยีราฟ",e:"🦒"},{a:"เต่า",e:"🐢"},{a:"จิ้งจอก",e:"🦊"},
+    {a:"แพนด้า",e:"🐼"},{a:"นกอินทรี",e:"🦅"},{a:"ปลาหมึก",e:"🐙"},{a:"ผีเสื้อ",e:"🦋"},
+    {a:"ม้า",e:"🐴"},{a:"กบ",e:"🐸"},{a:"ฉลาม",e:"🦈"},{a:"ผึ้ง",e:"🐝"}],
+  "ผลไม้":[
+    {a:"กล้วย",e:"🍌"},{a:"องุ่น",e:"🍇"},{a:"แตงโม",e:"🍉"},{a:"สตรอว์เบอร์รี",e:"🍓"},
+    {a:"สับปะรด",e:"🍍"},{a:"ส้ม",e:"🍊"},{a:"เชอร์รี",e:"🍒"},{a:"พีช",e:"🍑"},
+    {a:"มะพร้าว",e:"🥥"},{a:"กีวี",e:"🥝"},{a:"มะม่วง",e:"🥭"},{a:"เลมอน",e:"🍋"}],
+  "ยานพาหนะ":[
+    {a:"รถยนต์",e:"🚗"},{a:"เครื่องบิน",e:"✈️"},{a:"จักรยาน",e:"🚲"},{a:"เรือ",e:"⛵"},
+    {a:"รถไฟ",e:"🚆"},{a:"จรวด",e:"🚀"},{a:"เฮลิคอปเตอร์",e:"🚁"},{a:"รถบัส",e:"🚌"},
+    {a:"มอเตอร์ไซค์",e:"🏍️"},{a:"รถดับเพลิง",e:"🚒"},{a:"แทรกเตอร์",e:"🚜"},{a:"รถตำรวจ",e:"🚓"}]
+};
+
+/* ============ TRANSPORT (sync ระหว่างหน้าต่าง) ============ */
+const KEY='pb_state';
+let CH=null; try{CH=new BroadcastChannel('picture-battle');}catch(e){}
+let ROLE=null, lastWrite=0;
+
+function broadcast(snap){
+  const msg=JSON.stringify(snap);
+  if(CH) try{CH.postMessage(snap);}catch(e){}
+  const now=performance.now();
+  if(snap._force || now-lastWrite>100){ lastWrite=now; try{localStorage.setItem(KEY,msg);}catch(e){} }
+}
+function onIncoming(snap){
+  if(ROLE!=='player') return;
+  if(snap.type==='hello') return;
+  renderDisplay(snap);
+}
+if(CH) CH.onmessage=e=>{ if(e.data&&e.data.type==='hello'){ if(ROLE!=='player') pushState(true); } else onIncoming(e.data); };
+window.addEventListener('storage',e=>{ if(e.key===KEY&&e.newValue) onIncoming(JSON.parse(e.newValue)); });
+
+/* ============ ROLE / NAV ============ */
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function pickRole(r){
+  ROLE=r;
+  if(r==='player'){
+    show('display');
+    document.getElementById('soloControls').style.display='none';
+    const s=localStorage.getItem(KEY);
+    renderDisplay(s?JSON.parse(s):{phase:'setup'});
+    if(CH) try{CH.postMessage({type:'hello'});}catch(e){}
+  } else {
+    document.getElementById('setupSub').textContent = r==='admin'
+      ? 'คุมเกมจากหน้านี้ · เปิดหน้าจอผู้เล่นแยกอีกหน้าต่าง'
+      : 'นาฬิกาหมากรุก · เวลาใครหมดก่อนแพ้ (จอเดียว)';
+    document.getElementById('setupHint').innerHTML = r==='admin'
+      ? 'หลังเริ่มเกม กด “เปิดหน้าจอผู้เล่น” เพื่อเปิดอีกหน้าต่างไปโชว์จอใหญ่'
+      : 'ปุ่มลัด: ←/A แดงถูก · →/L น้ำเงินถูก · เว้นวรรค ข้าม · P พัก';
+    show('setup');
+  }
+}
+/* auto player mode via ?view=player */
+if(new URLSearchParams(location.search).get('view')==='player'){ pickRole('player'); }
+
+function openPlayer(){
+  const url=location.href.split('#')[0].split('?')[0]+'?view=player';
+  const w=window.open(url,'pbPlayer','width=1280,height=800');
+  if(!w) alert('เบราว์เซอร์บล็อกป๊อปอัป — อนุญาตป๊อปอัปแล้วลองใหม่ หรือเปิดไฟล์อีกแท็บแล้วเลือก “หน้าจอผู้เล่น”');
+}
+
+/* ============ GAME LOGIC (admin & solo = brain) ============ */
+let G=null;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+const catsEl=document.getElementById('cats');
+Object.keys(DECKS).forEach((c,i)=>{
+  const chip=document.createElement('div');
+  chip.className='cat-chip'+(i===0?' on':''); chip.textContent=c; chip.dataset.cat=c;
+  chip.onclick=()=>chip.classList.toggle('on'); catsEl.appendChild(chip);
+});
+
+function curItem(){return G.pool[G.idx % G.pool.length];}
+
+function snapshot(extra){
+  const it=(G&&G.pool)?curItem():null;
+  return Object.assign({
+    type:'state',
+    phase: !G?'setup':(G.ended?'ended':'playing'),
+    item: it?{a:it.a,e:it.e||'',img:it.img||'',cat:it.cat}:null,
+    reveal: G?G.revealing:false,
+    names: G?G.names:{red:'ทีมแดง',blue:'ทีมน้ำเงิน'},
+    score: G?G.score:{red:0,blue:0},
+    time:  G?{red:Math.max(0,G.time.red),blue:Math.max(0,G.time.blue)}:{red:0,blue:0},
+    turn:  G?G.turn:'red',
+    qNum:  G?G.qNum:1,
+    paused:G?G.paused:false,
+    winner:G?G.winner:null,
+    endReason:G?G.endReason:''
+  }, extra||{});
+}
+function pushState(force,extra){
+  const snap=snapshot(extra); if(force) snap._force=true;
+  if(ROLE==='admin'){ renderAdmin(snap); broadcast(snap); }
+  else if(ROLE==='solo'){ renderDisplay(snap); }
+}
+
+function startGame(){
+  const chosen=[...document.querySelectorAll('.cat-chip.on')].map(c=>c.dataset.cat);
+  if(chosen.length===0){alert('เลือกอย่างน้อย 1 หมวด');return;}
+  let pool=[]; chosen.forEach(c=>DECKS[c].forEach(it=>pool.push(Object.assign({cat:c},it)))); shuffle(pool);
+  const bank=Math.max(5,parseInt(document.getElementById('timeBank').value)||50)*1000;
+  G={pool,idx:0,
+     names:{red:document.getElementById('redName').value||'ทีมแดง',blue:document.getElementById('blueName').value||'ทีมน้ำเงิน'},
+     score:{red:0,blue:0}, time:{red:bank,blue:bank},
+     turn:document.getElementById('firstTurn').value, qNum:1,
+     paused:false, revealing:false, ended:false, winner:null, endReason:'', last:performance.now()};
+  if(ROLE==='solo'){
+    show('display');
+    document.getElementById('soloControls').style.display='none';   // ซ่อนปุ่ม ใช้โซนแตะแทน
+    document.getElementById('tapzones').classList.add('on');
+    document.getElementById('gear').classList.add('on');
+    const tz=document.getElementById('tapzones');                   // โชว์เส้นโซนตอนเริ่ม 3.5 วิ
+    tz.classList.add('hints'); setTimeout(()=>tz.classList.remove('hints'),3500);
+  } else { show('admin'); }
+  pushState(true);
+  requestAnimationFrame(tick);
+}
+
+function tick(now){
+  if(!G||G.ended) return;
+  const dt=now-G.last; G.last=now;
+  if(!G.paused&&!G.revealing){
+    G.time[G.turn]-=dt;
+    if(G.time[G.turn]<=0){
+      G.time[G.turn]=0;
+      const loser=G.turn, winner=loser==='red'?'blue':'red';
+      endGame('เวลาของ'+G.names[loser]+'หมด',winner); return;
+    }
+  }
+  pushState(false);
+  requestAnimationFrame(tick);
+}
+
+function correct(side){
+  if(!G||G.ended||G.revealing||G.paused) return;
+  if(side!==G.turn) return;            // ต้องเป็นฝั่งที่ถึงตาเท่านั้น
+  G.score[side]++; revealThenNext(side);
+}
+function skip(){ if(!G||G.ended||G.revealing||G.paused) return; revealThenNext(null); }
+function revealThenNext(flashSide){
+  G.revealing=true;
+  pushState(true, flashSide?{flash:flashSide}:{});
+  setTimeout(()=>{
+    if(!G) return;
+    G.idx++; G.qNum++; G.turn=G.turn==='red'?'blue':'red'; G.revealing=false;
+    pushState(true);
+  },900);
+}
+function togglePause(){ if(!G||G.ended) return; G.paused=!G.paused;
+  const lbl=G.paused?'▶ เล่นต่อ':'⏸ พัก';
+  document.getElementById('adminPause').firstChild.textContent=lbl;
+  document.getElementById('soloPause').firstChild.textContent=lbl;
+  pushState(true);
+}
+function endGame(reason,winner){
+  if(!G||G.ended) return;
+  if(!winner) winner=G.score.red===G.score.blue?'tie':(G.score.red>G.score.blue?'red':'blue');
+  G.ended=true; G.winner=winner; G.endReason=reason;
+  pushState(true);
+}
+
+/* ============ TAP ZONES / GEAR MENU (solo) ============ */
+function tapZone(which){
+  if(which==='red') correct('red');
+  else if(which==='blue') correct('blue');
+  else skip();
+}
+function toggleMenu(){document.getElementById('gmenu').classList.toggle('on');}
+function closeMenu(){document.getElementById('gmenu').classList.remove('on');}
+function toggleHints(){document.getElementById('tapzones').classList.toggle('hints'); closeMenu();}
+function toggleSoloButtons(){
+  const c=document.getElementById('soloControls');
+  c.style.display = c.style.display==='flex' ? 'none' : 'flex';
+  closeMenu();
+}
+
+/* ============ RENDER: DISPLAY (player & solo) ============ */
+function renderDisplay(s){
+  if(ROLE==='player'){ show('display'); document.getElementById('soloControls').style.display='none'; }
+  const oWait=document.getElementById('oWait'), oPause=document.getElementById('oPause'), oEnd=document.getElementById('oEnd');
+  oWait.classList.toggle('show', s.phase==='setup'||!s.item);
+  oPause.classList.toggle('show', s.phase==='playing'&&s.paused);
+  oEnd.classList.toggle('show', s.phase==='ended');
+  if(s.phase==='ended'){
+    const w=document.getElementById('oEndWinner');
+    if(s.winner==='tie'){w.textContent='เสมอ!';w.className='big';}
+    else{w.textContent='🏆 '+s.names[s.winner]+' ชนะ!';w.className='big '+s.winner;}
+    document.getElementById('oEndScore').textContent=s.names.red+' '+s.score.red+'  —  '+s.score.blue+' '+s.names.blue;
+    document.getElementById('oEndReason').textContent=s.endReason;
+  }
+  // names / scores / clocks
+  document.getElementById('dRedName').textContent=s.names.red;
+  document.getElementById('dBlueName').textContent=s.names.blue;
+  document.getElementById('dRedScore').textContent=s.score.red;
+  document.getElementById('dBlueScore').textContent=s.score.blue;
+  document.getElementById('dRedTime').textContent=Math.ceil(s.time.red/1000);
+  document.getElementById('dBlueTime').textContent=Math.ceil(s.time.blue/1000);
+  document.getElementById('dRedClock').classList.toggle('low',s.time.red<=10000);
+  document.getElementById('dBlueClock').classList.toggle('low',s.time.blue<=10000);
+  document.getElementById('dQCount').textContent='ข้อ '+s.qNum;
+  // turn
+  const red=s.turn==='red';
+  document.getElementById('dPRed').classList.toggle('active',red);
+  document.getElementById('dPRed').classList.toggle('dim',!red);
+  document.getElementById('dPBlue').classList.toggle('active',!red);
+  document.getElementById('dPBlue').classList.toggle('dim',red);
+  document.getElementById('dFlagRed').style.display=red?'block':'none';
+  document.getElementById('dFlagBlue').style.display=red?'none':'block';
+  // media
+  if(s.item){
+    const m=document.getElementById('dMedia'), bg=document.getElementById('dBg');
+    if(s.item.img){ m.innerHTML='<img src="'+s.item.img+'" alt="">'; bg.textContent=''; }
+    else { m.textContent=s.item.e; bg.textContent=s.item.e; }
+    document.getElementById('dCatTag').textContent='หมวด: '+s.item.cat;
+    const ans=document.getElementById('dAnswer'); ans.textContent=s.item.a;
+    ans.classList.toggle('show', !!s.reveal);
+  }
+  // flash
+  if(s.flash){ const f=document.getElementById('dFlash'); f.className='flash '+s.flash; void f.offsetWidth; f.className='flash '+s.flash+' go'; }
+}
+
+/* ============ RENDER: ADMIN PANEL ============ */
+function renderAdmin(s){
+  document.getElementById('connStatus'); // (kept simple)
+  document.getElementById('aRedName').textContent=s.names.red;
+  document.getElementById('aBlueName').textContent=s.names.blue;
+  document.getElementById('aRedScore').textContent=s.score.red;
+  document.getElementById('aBlueScore').textContent=s.score.blue;
+  document.getElementById('aRedTime').textContent=Math.ceil(s.time.red/1000);
+  document.getElementById('aBlueTime').textContent=Math.ceil(s.time.blue/1000);
+  document.getElementById('aRedTime').classList.toggle('low',s.time.red<=10000);
+  document.getElementById('aBlueTime').classList.toggle('low',s.time.blue<=10000);
+  document.getElementById('aRedCard').classList.toggle('turn',s.turn==='red'&&s.phase==='playing');
+  document.getElementById('aBlueCard').classList.toggle('turn',s.turn==='blue'&&s.phase==='playing');
+  if(s.item){
+    const th=document.getElementById('aThumb');
+    if(s.item.img){th.innerHTML='<img src="'+s.item.img+'">';} else {th.textContent=s.item.e;}
+    document.getElementById('aCat').textContent='หมวด: '+s.item.cat;
+    document.getElementById('aAnswer').textContent=s.item.a;
+    document.getElementById('aQCount').textContent='ข้อ '+s.qNum;
+  }
+  if(s.phase==='ended'){
+    document.getElementById('aAnswer').textContent = s.winner==='tie'?'เสมอ!':('🏆 '+s.names[s.winner]+' ชนะ');
+    document.getElementById('aCat').textContent=s.endReason;
+  }
+}
+
+/* connection indicator: player says hello → admin lights up */
+if(CH) CH.addEventListener('message',e=>{
+  if(e.data&&e.data.type==='hello'&&ROLE==='admin'){
+    const el=document.getElementById('connStatus'); el.textContent='หน้าจอผู้เล่น: เชื่อมแล้ว ✓'; el.classList.add('on');
+  }
+});
+
+/* keyboard (admin & solo only) */
+document.addEventListener('keydown',e=>{
+  if(ROLE==='player'||!G) return;
+  const k=e.key.toLowerCase();
+  if(k==='arrowleft'||k==='a'){e.preventDefault();correct('red');}
+  else if(k==='arrowright'||k==='l'){e.preventDefault();correct('blue');}
+  else if(k===' '){e.preventDefault();skip();}
+  else if(k==='p'){e.preventDefault();togglePause();}
+});
+</script>
+</body>
+</html>
