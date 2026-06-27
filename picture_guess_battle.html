@@ -268,6 +268,10 @@
   #tourEndBar.on{display:flex;}
   #tourEndBar button{flex:1; padding:18px; font-size:18px; font-weight:800; border:none; border-radius:14px; cursor:pointer;
     background:linear-gradient(90deg,var(--red),var(--blue)); color:#fff;}
+  #tieBar{display:none; margin-top:12px;}
+  #tieBar.on{display:flex;}
+  #tieBar button{flex:1; padding:18px; font-size:18px; font-weight:800; border:none; border-radius:14px; cursor:pointer;
+    background:linear-gradient(90deg,var(--gold),#ff8a00); color:var(--ink);}
   .champ{text-align:center; padding:30px 16px; background:rgba(244,196,59,.12);
     border:1px solid var(--gold); border-radius:18px;}
   .champ .c1{font-size:18px; opacity:.7;} .champ .c2{font-size:34px; font-weight:900; color:var(--gold); margin-top:8px;}
@@ -454,6 +458,9 @@
 
   <div id="tourEndBar">
     <button onclick="finishMatch()">✅ บันทึกผล → แมตช์ถัดไป</button>
+  </div>
+  <div id="tieBar">
+    <button onclick="startTiebreak()">⚡ เสมอ! ไทเบรก 15 วิ (เล่นต่อจากแต้มเดิม)</button>
   </div>
 </section>
 
@@ -710,6 +717,7 @@ function tick(now){
     G.time[G.turn]-=dt;
     if(G.time[G.turn]<=0){
       G.time[G.turn]=0;
+      if(G.tiebreak){ endGame('หมดเวลาไทเบรก — ตัดสินที่แต้ม'); return; }   // ไทเบรก: ใครนำตอนหมดเวลาชนะ
       const loser=G.turn, winner=loser==='red'?'blue':'red';
       endGame('เวลาของ'+G.names[loser]+'หมด',winner); return;
     }
@@ -729,7 +737,9 @@ function revealThenNext(flashSide){
   pushState(true, flashSide?{flash:flashSide}:{});
   setTimeout(()=>{
     if(!G) return;
-    G.idx++; G.qNum++; G.turn=G.turn==='red'?'blue':'red'; G.revealing=false;
+    G.idx++; G.qNum++;
+    if(flashSide) G.turn=G.turn==='red'?'blue':'red';   // สลับตาเฉพาะตอนตอบถูก; ข้าม=ทีมเดิมเล่นต่อจนกว่าจะถูก
+    G.revealing=false;
     pushState(true);
   },900);
 }
@@ -744,7 +754,18 @@ function endGame(reason,winner){
   if(!winner) winner=G.score.red===G.score.blue?'tie':(G.score.red>G.score.blue?'red':'blue');
   G.ended=true; G.winner=winner; G.endReason=reason;
   pushState(true);
-  if(G.tour) document.getElementById('tourEndBar').classList.add('on');
+  if(winner==='tie') document.getElementById('tieBar').classList.add('on');
+  else if(G.tour) document.getElementById('tourEndBar').classList.add('on');
+}
+function startTiebreak(){
+  if(!G) return;
+  document.getElementById('tieBar').classList.remove('on');
+  G.time={red:15000, blue:15000};   // เติมเวลาคนละ 15 วิ คงแต้มเดิม
+  G.tiebreak=true;
+  G.ended=false; G.winner=null; G.endReason=''; G.revealing=false; G.paused=false;
+  G.last=performance.now();
+  pushState(true);
+  requestAnimationFrame(tick);
 }
 
 /* ============ TAP ZONES / GEAR MENU (solo) ============ */
@@ -987,13 +1008,14 @@ function startTournamentMatch(){
      turn:MS.first, qNum:1, paused:false, revealing:false, ended:false, winner:null, endReason:'', last:performance.now(),
      tour:{matchId:MS.matchId, gRed:MS.gRed, gBlue:MS.gBlue, pRed, pBlue}};
   document.getElementById('tourEndBar').classList.remove('on');
+  document.getElementById('tieBar').classList.remove('on');
   show('admin');
   pushState(true);
   requestAnimationFrame(tick);
 }
 function finishMatch(){
   if(!G||!G.ended||!G.tour) return;
-  if(G.winner==='tie'){ alert('ผลเสมอ — กดเล่นต่อ/ให้ตอบเพิ่มเพื่อหาผู้ชนะก่อนบันทึก'); return; }
+  if(G.winner==='tie'){ alert('ผลเสมอ — กดปุ่ม "ไทเบรก 15 วิ" เพื่อหาผู้ชนะก่อนบันทึก'); return; }
   const t=G.tour, m=TOUR.matches[t.matchId];
   m.done=true;
   m.colors={red:t.gRed, blue:t.gBlue};
@@ -1004,6 +1026,7 @@ function finishMatch(){
   m.endReason=G.endReason;
   saveTour();
   document.getElementById('tourEndBar').classList.remove('on');
+  document.getElementById('tieBar').classList.remove('on');
   G=null;
   renderTour();
   show('tour');
