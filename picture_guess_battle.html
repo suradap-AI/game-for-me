@@ -597,14 +597,15 @@
     </div>
 
     <div class="field" style="margin-top:14px">
-      <div style="padding:14px 16px;border-radius:14px;border:1px dashed rgba(120,170,255,.4);background:rgba(120,170,255,.07);text-align:center;font-size:14px">
-        🎰 หมวดของแมตช์นี้จะ <b>สุ่มหมุนตอนกดเริ่ม</b> — ลุ้นพร้อมกันบนจอใหญ่
+      <div style="padding:14px 16px;border-radius:14px;border:1px dashed rgba(244,196,59,.45);background:rgba(244,196,59,.08);text-align:center">
+        <div style="font-size:12px;opacity:.7;margin-bottom:4px">🎰 หมวดประจำแมตช์นี้ (สุ่มแล้ว — เลือกตัวแทนให้เหมาะ)</div>
+        <div id="msDrawCat" style="font-size:24px;font-weight:900;color:var(--gold)">—</div>
       </div>
       <div class="cats" id="msCats" style="display:none"></div>
     </div>
 
-    <button class="startbtn" style="margin-top:18px" onclick="startTournamentMatch()">▶ เริ่มแมตช์ (สุ่มหมวด)</button>
-    <div class="back" style="text-align:center;margin-top:12px;font-size:13px;opacity:.6;cursor:pointer;text-decoration:underline" onclick="show('tour')">← กลับตารางทัวร์</div>
+    <button class="startbtn" id="msStartBtn" style="margin-top:18px" onclick="startTournamentMatch()">▶ เริ่มแมตช์</button>
+    <div class="back" style="text-align:center;margin-top:12px;font-size:13px;opacity:.6;cursor:pointer;text-decoration:underline" onclick="cancelMatchSetup()">← กลับตารางทัวร์</div>
   </div>
 </section>
 
@@ -1004,6 +1005,7 @@ function renderDisplay(s){
   const oDraw=document.getElementById('oDraw');
   if(s.phase==='draw'&&s.draw){
     oDraw.classList.add('show');
+    renderDisplay._mediaKey=null;   // รีเซ็ตคีย์ภาพ → แมตช์ใหม่บังคับโหลดภาพแรกเสมอ
     if(s.draw.id!==renderDisplay._drawId){
       renderDisplay._drawId=s.draw.id;
       spinReel(document.getElementById('oDrawReel'), s.draw.cat);
@@ -1034,14 +1036,22 @@ function renderDisplay(s){
   document.getElementById('dPBlue').classList.toggle('dim',red);
   document.getElementById('dFlagRed').style.display=red?'block':'none';
   document.getElementById('dFlagBlue').style.display=red?'none':'block';
-  // media
+  // media — สร้าง <img>/emoji ใหม่ "เฉพาะตอนเปลี่ยนภาพ" เท่านั้น
+  // (เดิมสร้างใหม่ทุกเฟรมจาก tick → รูปจริงโหลดซ้ำรัวๆ = กระพริบ)
   if(s.item){
     const m=document.getElementById('dMedia'), bg=document.getElementById('dBg');
-    if(s.item.img){ m.innerHTML='<img src="'+s.item.img+'" alt="" data-fb="'+(s.item.e||'🏷️')+'" onerror="imgFail(this)">'; bg.textContent=''; }
-    else { m.textContent=s.item.e; bg.textContent=s.item.e; }
+    const mediaKey=s.qNum+'|'+(s.item.img||s.item.e||'');
+    if(renderDisplay._mediaKey!==mediaKey){
+      renderDisplay._mediaKey=mediaKey;
+      if(s.item.img){ m.innerHTML='<img src="'+s.item.img+'" alt="" data-fb="'+(s.item.e||'🏷️')+'" onerror="imgFail(this)">'; bg.textContent=''; }
+      else { m.textContent=s.item.e; bg.textContent=s.item.e; }
+    }
     document.getElementById('dCatTag').textContent='หมวด: '+s.item.cat;
-    const ans=document.getElementById('dAnswer'); ans.textContent=s.item.a;
-    ans.classList.toggle('show', !!s.reveal);
+    // โชว์เฉลยเฉพาะตอน reveal เท่านั้น และเซ็ตข้อความเฉพาะตอนโชว์
+    // (กันบั๊ก: ถ้าเซ็ตข้อความเฉลยภาพถัดไปก่อน element จาง จะเห็นเฉลยใหม่แวบ)
+    const ans=document.getElementById('dAnswer');
+    if(s.reveal){ ans.textContent=s.item.a; ans.classList.add('show'); }
+    else { ans.classList.remove('show'); }
   }
   // flash
   if(s.flash){ const f=document.getElementById('dFlash'); f.className='flash '+s.flash; void f.offsetWidth; f.className='flash '+s.flash+' go'; }
@@ -1211,6 +1221,28 @@ function openMatchSetup(matchId){
   MS={matchId, gRed:m.g1, gBlue:m.g2, time:50, first:'red'};
   renderMatchSetup();
   show('matchSetup');
+  drawMatchCat(m.cat);            // สุ่มหมวดให้เห็นก่อน แล้วค่อยเลือกตัวแทน
+}
+/* สุ่มหมวดโชว์บนจอใหญ่ + แบนเนอร์ในหน้าตั้งค่า (ยังไม่เริ่มเล่น) */
+function drawMatchCat(cat){
+  G={pool:null, idx:0, cat, preMatch:true,
+     names:{red:gName(MS.gRed), blue:gName(MS.gBlue)},
+     score:{red:0,blue:0}, time:{red:0,blue:0},
+     turn:MS.first, qNum:1, paused:false, revealing:false, ended:false, winner:null, endReason:'',
+     draw:{id:Date.now(), cat, done:false}};
+  if(G._dt) clearTimeout(G._dt);
+  pushState(true);                // จอใหญ่: phase 'draw' → เริ่มหมุนสล็อต
+  const btn=document.getElementById('msStartBtn');
+  if(btn){ btn.disabled=true; btn.style.opacity=.45; }
+  // หมุนแบนเนอร์หมวดในหน้าตั้งค่า แล้วปลดล็อกปุ่มเริ่มเมื่อได้หมวด
+  spinReel(document.getElementById('msDrawCat'), cat, ()=>{
+    const b=document.getElementById('msStartBtn');
+    if(b){ b.disabled=false; b.style.opacity=1; }
+  });
+}
+function cancelMatchSetup(){
+  if(G&&G.preMatch){ if(G._dt) clearTimeout(G._dt); G=null; pushState(true); }
+  show('tour');
 }
 function swapColors(){ const t=MS.gRed; MS.gRed=MS.gBlue; MS.gBlue=t; renderMatchSetup(); }
 function pickTime(t){ MS.time=t; document.querySelectorAll('#msTimeSeg button').forEach(b=>b.classList.toggle('on',+b.dataset.t===t)); }
@@ -1241,6 +1273,7 @@ function renderMatchSetup(){
 }
 const MATCH_CAP=60;   // เพดานรูปต่อแมตช์
 function startTournamentMatch(){
+  if(G&&G._dt) clearTimeout(G._dt);          // หยุดสล็อตพรีแมตช์ถ้ายังหมุนค้าง
   const m=TOUR.matches[MS.matchId];
   const cat=m.cat;
   const src=DECKS[cat].map(it=>Object.assign({cat},it));
@@ -1256,12 +1289,13 @@ function startTournamentMatch(){
      score:{red:0,blue:0}, time:{red:bank,blue:bank},
      turn:MS.first, qNum:1, paused:false, revealing:false, ended:false, winner:null, endReason:'', last:performance.now(),
      tour:{matchId:MS.matchId, gRed:MS.gRed, gBlue:MS.gBlue, pRed, pBlue},
-     draw:{id:Date.now(), cat, done:false}};
+     draw:{id:Date.now(), cat, done:true}};   // หมวดสุ่มไปแล้วตอนเปิดหน้าตั้งค่า → เริ่มเล่นได้เลย
   document.getElementById('tourEndBar').classList.remove('on');
   document.getElementById('tieBar').classList.remove('on');
   show('admin');
-  pushState(true);     // phase 'draw' → ทั้งสองจอเริ่มหมุนสล็อต
-  runDraw(cat);
+  pushState(true);     // phase 'playing' → เข้าเกมเลย
+  startCountdown();
+  requestAnimationFrame(tick);
 }
 const DRAW_MS=3200;
 function runDraw(cat){
