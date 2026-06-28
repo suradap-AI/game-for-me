@@ -1,0 +1,73 @@
+รายการรูปหมวด "การ์ตูน" — 60 ตัวละคร
+=========================================
+วิธีใช้: หารูปตัวละคร (พื้นหลังขาว/โปร่งใส เห็นหน้าชัด) เซฟลงโฟลเดอร์นี้
+        ตั้งชื่อไฟล์ตรงตามคอลัมน์ "ไฟล์" เป๊ะๆ (.png)
+        ยังไม่มีรูป → เกมโชว์อีโมจิแทนชั่วคราว ไม่พัง
+
+ลำดับ | คำตอบในเกม           | ไฟล์ที่ต้องเซฟ
+------+-----------------------+--------------------------
+ 1   | โดราเอมอน              | doraemon.png
+ 2   | มิกกี้เมาส์            | mickey-mouse.png
+ 3   | มินเนียน               | minion.png
+ 4   | พิคาชู                 | pikachu.png
+ 5   | เฮลโลคิตตี้            | hello-kitty.png
+ 6   | หมีพูห์                | winnie-the-pooh.png
+ 7   | สนูปปี้                | snoopy.png
+ 8   | สปองจ์บ็อบ             | spongebob.png
+ 9   | โทโทโร่                | totoro.png
+10   | ลูฟี่ (วันพีซ)         | luffy.png
+11   | นารูโตะ                | naruto.png
+12   | รีบอร์น                 | reborn.png
+13   | โคนัน                  | conan.png
+14   | ชินจัง                 | shinchan.png
+15   | เอลซ่า (โฟรเซ่น)       | elsa.png
+16   | วู้ดดี้ (ทอยสตอรี่)    | woody.png
+17   | บัซ ไลต์เยียร์         | buzz-lightyear.png
+18   | ซิมบ้า (ไลอ้อนคิง)     | simba.png
+19   | นีโม่                  | nemo.png
+20   | ชเร็ค                  | shrek.png
+21   | แบทแมน                 | batman.png
+22   | ซูเปอร์แมน             | superman.png
+23   | สไปเดอร์แมน            | spiderman.png
+24   | ไอรอนแมน               | ironman.png
+25   | กัปตันอเมริกา          | captain-america.png
+26   | ฮัลค์                  | hulk.png
+27   | เอลโม่                 | elmo.png
+28   | บั๊กส์ บันนี่          | bugs-bunny.png
+29   | ทอมกับเจอร์รี่         | tom-and-jerry.png
+30   | โดนัลด์ ดั๊ก           | donald-duck.png
+31   | กูฟฟี่                 | goofy.png
+32   | บาร์บี้                | barbie.png
+33   | แพทริค                 | patrick.png
+34   | พิงกุ                  | pingu.png
+35   | การ์ฟิลด์              | garfield.png
+36   | สกูบี้ดู               | scooby-doo.png
+37   | มาริโอ้                | mario.png
+38   | ลุยจิ                  | luigi.png
+39   | ซอนิค                  | sonic.png
+40   | เคอร์บี้               | kirby.png
+41   | อีวุย                  | eevee.png
+42   | คุมะมง                 | kumamon.png
+43   | ริลัคคุมะ              | rilakkuma.png
+44   | หมีบราวน์ (ไลน์)       | brown-line.png
+45   | โคนี่ (ไลน์)           | cony-line.png
+46   | สติทช์                 | stitch.png
+47   | มูมิน                  | moomin.png
+48   | เปปป้าพิก              | peppa-pig.png
+49   | พาวเวอร์พัฟ            | powerpuff.png
+50   | เบ็นเท็น               | ben-10.png
+51   | แองกรี้เบิร์ด          | angry-birds.png
+52   | พุมบ้า              | pumba.png
+53   | ดอรามี                 | dorami.png
+54   | เคโรโระ                 | Keroro.png
+55   | มายเมโลดี้             | my-melody.png
+56   | พอมปอมปูริน            | pompompurin.png
+57   | คุโรมิ                 | kuromi.png
+58   | ซินนามอนโรล            | cinnamoroll.png
+59   | โอลาฟ (โฟรเซ่น)        | olaf.png
+60   | แบดมารุ                | badtz-maru.png
+
+เคล็ดลับหารูป:
+- เสิร์ช "<ชื่อตัวละคร> png transparent" หรือ "<ชื่อ> character"
+- เลือกรูปที่เห็นหน้า/ทั้งตัวชัด พื้นหลังโปร่งใส
+- ตัวละครลิขสิทธิ์ ใช้เล่นในกลุ่มได้ ไม่เผยแพร่เชิงพาณิชย์
