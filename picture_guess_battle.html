@@ -615,21 +615,22 @@
    แต่ละ item:  {a:"คำตอบ", e:"emoji"}  หรือใส่ภาพจริง {a:"คำตอบ", img:"path/รูป.jpg"}  */
 const DECKS = {
   "ธงประเทศ":[
-    {a:"ไทย",e:"🇹🇭",img:"flag/thailand.png"},{a:"ญี่ปุ่น",e:"🇯🇵",img:"flag/japan.png"},{a:"เกาหลีใต้",e:"🇰🇷",img:"flag/south-korea.png"},{a:"จีน",e:"🇨🇳",img:"flag/china.png"},
-    {a:"สหรัฐอเมริกา",e:"🇺🇸",img:"flag/usa.png"},{a:"อังกฤษ",e:"🇬🇧",img:"flag/uk.png"},{a:"ฝรั่งเศส",e:"🇫🇷",img:"flag/france.png"},{a:"เยอรมนี",e:"🇩🇪",img:"flag/germany.png"},
-    {a:"อิตาลี",e:"🇮🇹",img:"flag/italy.png"},{a:"สเปน",e:"🇪🇸",img:"flag/spain.png"},{a:"แคนาดา",e:"🇨🇦",img:"flag/canada.png"},{a:"บราซิล",e:"🇧🇷",img:"flag/brazil.png"},
-    {a:"อินเดีย",e:"🇮🇳",img:"flag/india.png"},{a:"ออสเตรเลีย",e:"🇦🇺",img:"flag/australia.png"},{a:"รัสเซีย",e:"🇷🇺",img:"flag/russia.png"},{a:"เม็กซิโก",e:"🇲🇽",img:"flag/mexico.png"},
-    {a:"สวิตเซอร์แลนด์",e:"🇨🇭",img:"flag/switzerland.png"},{a:"เนเธอร์แลนด์",e:"🇳🇱",img:"flag/netherlands.png"},{a:"สวีเดน",e:"🇸🇪",img:"flag/sweden.png"},{a:"นอร์เวย์",e:"🇳🇴",img:"flag/norway.png"},
-    {a:"สิงคโปร์",e:"🇸🇬",img:"flag/singapore.png"},{a:"มาเลเซีย",e:"🇲🇾",img:"flag/malaysia.png"},{a:"อินโดนีเซีย",e:"🇮🇩",img:"flag/indonesia.png"},{a:"เวียดนาม",e:"🇻🇳",img:"flag/vietnam.png"},
-    {a:"ฟิลิปปินส์",e:"🇵🇭",img:"flag/philippines.png"},{a:"ลาว",e:"🇱🇦",img:"flag/laos.png"},{a:"กัมพูชา",e:"🇰🇭",img:"flag/cambodia.png"},{a:"เมียนมา",e:"🇲🇲",img:"flag/myanmar.png"},
-    {a:"อาร์เจนตินา",e:"🇦🇷",img:"flag/argentina.png"},{a:"โปรตุเกส",e:"🇵🇹",img:"flag/portugal.png"},{a:"กรีซ",e:"🇬🇷",img:"flag/greece.png"},{a:"ตุรกี",e:"🇹🇷",img:"flag/turkey.png"},
-    {a:"อียิปต์",e:"🇪🇬",img:"flag/egypt.png"},{a:"แอฟริกาใต้",e:"🇿🇦",img:"flag/south-africa.png"},{a:"ซาอุดีอาระเบีย",e:"🇸🇦",img:"flag/saudi-arabia.png"},{a:"สหรัฐอาหรับเอมิเรตส์",e:"🇦🇪",img:"flag/uae.png"},
-    {a:"นิวซีแลนด์",e:"🇳🇿",img:"flag/new-zealand.png"},{a:"ไอร์แลนด์",e:"🇮🇪",img:"flag/ireland.png"},{a:"เบลเยียม",e:"🇧🇪",img:"flag/belgium.png"},{a:"ออสเตรีย",e:"🇦🇹",img:"flag/austria.png"},
-    {a:"โปแลนด์",e:"🇵🇱",img:"flag/poland.png"},{a:"เดนมาร์ก",e:"🇩🇰",img:"flag/denmark.png"},{a:"ฟินแลนด์",e:"🇫🇮",img:"flag/finland.png"},{a:"ไต้หวัน",e:"🇹🇼",img:"flag/taiwan.png"},
-    {a:"ฮ่องกง",e:"🇭🇰",img:"flag/hong-kong.png"},{a:"ชิลี",e:"🇨🇱",img:"flag/chile.png"},{a:"โคลอมเบีย",e:"🇨🇴",img:"flag/colombia.png"},{a:"ยูเครน",e:"🇺🇦",img:"flag/ukraine.png"},
-    {a:"อิสราเอล",e:"🇮🇱",img:"flag/israel.png"},{a:"กาตาร์",e:"🇶🇦",img:"flag/qatar.png"},{a:"ปากีสถาน",e:"🇵🇰",img:"flag/pakistan.png"},{a:"อิหร่าน",e:"🇮🇷",img:"flag/iran.png"},
-    {a:"อิรัก",e:"🇮🇶",img:"flag/iraq.png"},{a:"คูเวต",e:"🇰🇼",img:"flag/kuwait.png"},{a:"โมร็อกโก",e:"🇲🇦",img:"flag/morocco.png"},{a:"คิวบา",e:"🇨🇺",img:"flag/cuba.png"},
-    {a:"เปรู",e:"🇵🇪",img:"flag/peru.png"},{a:"ฮังการี",e:"🇭🇺",img:"flag/hungary.png"},{a:"โรมาเนีย",e:"🇷🇴",img:"flag/romania.png"},{a:"สาธารณรัฐเช็ก",e:"🇨🇿",img:"flag/czech.png"}],
+    {a:"ไทย",e:"🇹🇭"},{a:"ญี่ปุ่น",e:"🇯🇵"},{a:"เกาหลีใต้",e:"🇰🇷"},{a:"จีน",e:"🇨🇳"},
+    {a:"สหรัฐอเมริกา",e:"🇺🇸"},{a:"อังกฤษ",e:"🇬🇧"},{a:"ฝรั่งเศส",e:"🇫🇷"},{a:"เยอรมนี",e:"🇩🇪"},
+    {a:"อิตาลี",e:"🇮🇹"},{a:"สเปน",e:"🇪🇸"},{a:"แคนาดา",e:"🇨🇦"},{a:"บราซิล",e:"🇧🇷"},
+    {a:"อินเดีย",e:"🇮🇳"},{a:"ออสเตรเลีย",e:"🇦🇺"},{a:"รัสเซีย",e:"🇷🇺"},{a:"เม็กซิโก",e:"🇲🇽"},
+    {a:"สวิตเซอร์แลนด์",e:"🇨🇭"},{a:"เนเธอร์แลนด์",e:"🇳🇱"},{a:"สวีเดน",e:"🇸🇪"},{a:"นอร์เวย์",e:"🇳🇴"},
+    {a:"สิงคโปร์",e:"🇸🇬"},{a:"มาเลเซีย",e:"🇲🇾"},{a:"อินโดนีเซีย",e:"🇮🇩"},{a:"เวียดนาม",e:"🇻🇳"},
+    {a:"ฟิลิปปินส์",e:"🇵🇭"},{a:"ลาว",e:"🇱🇦"},{a:"กัมพูชา",e:"🇰🇭"},{a:"เมียนมา",e:"🇲🇲"},
+    {a:"อาร์เจนตินา",e:"🇦🇷"},{a:"โปรตุเกส",e:"🇵🇹"},{a:"กรีซ",e:"🇬🇷"},{a:"ตุรกี",e:"🇹🇷"},
+    {a:"อียิปต์",e:"🇪🇬"},{a:"แอฟริกาใต้",e:"🇿🇦"},{a:"ซาอุดีอาระเบีย",e:"🇸🇦"},{a:"สหรัฐอาหรับเอมิเรตส์",e:"🇦🇪"},
+    {a:"นิวซีแลนด์",e:"🇳🇿"},{a:"ไอร์แลนด์",e:"🇮🇪"},{a:"เบลเยียม",e:"🇧🇪"},{a:"ออสเตรีย",e:"🇦🇹"},
+    {a:"โปแลนด์",e:"🇵🇱"},{a:"เดนมาร์ก",e:"🇩🇰"},{a:"ฟินแลนด์",e:"🇫🇮"},{a:"ไต้หวัน",e:"🇹🇼"},
+    {a:"ฮ่องกง",e:"🇭🇰"},{a:"ชิลี",e:"🇨🇱"},{a:"โคลอมเบีย",e:"🇨🇴"},{a:"ยูเครน",e:"🇺🇦"},
+    {a:"อิสราเอล",e:"🇮🇱"},{a:"กาตาร์",e:"🇶🇦"},{a:"ปากีสถาน",e:"🇵🇰"},{a:"อิหร่าน",e:"🇮🇷"},
+    {a:"อิรัก",e:"🇮🇶"},{a:"คูเวต",e:"🇰🇼"},{a:"โมร็อกโก",e:"🇲🇦"},{a:"คิวบา",e:"🇨🇺"},
+    {a:"เปรู",e:"🇵🇪"},{a:"ฮังการี",e:"🇭🇺"},{a:"โรมาเนีย",e:"🇷🇴"},{a:"สาธารณรัฐเช็ก",e:"🇨🇿"},
+    {a:"เกาหลีเหนือ",e:"🇰🇵"},{a:"มองโกเลีย",e:"🇲🇳"},{a:"เนปาล",e:"🇳🇵"},{a:"บังกลาเทศ",e:"🇧🇩"},{a:"ศรีลังกา",e:"🇱🇰"},{a:"ภูฏาน",e:"🇧🇹"},{a:"มัลดีฟส์",e:"🇲🇻"},{a:"อัฟกานิสถาน",e:"🇦🇫"},{a:"คาซัคสถาน",e:"🇰🇿"},{a:"อุซเบกิสถาน",e:"🇺🇿"},{a:"บรูไน",e:"🇧🇳"},{a:"ติมอร์-เลสเต",e:"🇹🇱"},{a:"จอร์แดน",e:"🇯🇴"},{a:"เลบานอน",e:"🇱🇧"},{a:"ซีเรีย",e:"🇸🇾"},{a:"โอมาน",e:"🇴🇲"},{a:"เยเมน",e:"🇾🇪"},{a:"บาห์เรน",e:"🇧🇭"},{a:"ไอซ์แลนด์",e:"🇮🇸"},{a:"ลักเซมเบิร์ก",e:"🇱🇺"},{a:"โมนาโก",e:"🇲🇨"},{a:"ลิกเตนสไตน์",e:"🇱🇮"},{a:"มอลตา",e:"🇲🇹"},{a:"ไซปรัส",e:"🇨🇾"},{a:"โครเอเชีย",e:"🇭🇷"},{a:"เซอร์เบีย",e:"🇷🇸"},{a:"สโลวีเนีย",e:"🇸🇮"},{a:"สโลวาเกีย",e:"🇸🇰"},{a:"บัลแกเรีย",e:"🇧🇬"},{a:"เอสโตเนีย",e:"🇪🇪"},{a:"ลัตเวีย",e:"🇱🇻"},{a:"ลิทัวเนีย",e:"🇱🇹"},{a:"แอลเบเนีย",e:"🇦🇱"},{a:"เบลารุส",e:"🇧🇾"},{a:"จอร์เจีย",e:"🇬🇪"},{a:"อาร์เมเนีย",e:"🇦🇲"},{a:"อาเซอร์ไบจาน",e:"🇦🇿"},{a:"ไนจีเรีย",e:"🇳🇬"},{a:"เคนยา",e:"🇰🇪"},{a:"เอธิโอเปีย",e:"🇪🇹"},{a:"กานา",e:"🇬🇭"},{a:"แทนซาเนีย",e:"🇹🇿"},{a:"ยูกันดา",e:"🇺🇬"},{a:"แอลจีเรีย",e:"🇩🇿"},{a:"ตูนิเซีย",e:"🇹🇳"},{a:"ลิเบีย",e:"🇱🇾"},{a:"ซูดาน",e:"🇸🇩"},{a:"เซเนกัล",e:"🇸🇳"},{a:"แคเมอรูน",e:"🇨🇲"},{a:"ซิมบับเว",e:"🇿🇼"},{a:"เวเนซุเอลา",e:"🇻🇪"},{a:"เอกวาดอร์",e:"🇪🇨"},{a:"โบลิเวีย",e:"🇧🇴"},{a:"ปารากวัย",e:"🇵🇾"},{a:"อุรุกวัย",e:"🇺🇾"},{a:"คอสตาริกา",e:"🇨🇷"},{a:"ปานามา",e:"🇵🇦"},{a:"จาเมกา",e:"🇯🇲"},{a:"ฟิจิ",e:"🇫🇯"},{a:"มาเก๊า",e:"🇲🇴"}],
   "สัตว์":[{a:"หมา",e:"🐶",img:"animal/dog.png"},{a:"แมว",e:"🐱",img:"animal/cat.png"},{a:"ช้าง",e:"🐘",img:"animal/elephant.png"},{a:"สิงโต",e:"🦁",img:"animal/lion.png"},{a:"เสือ",e:"🐯",img:"animal/tiger.png"},{a:"หมี",e:"🐻",img:"animal/bear.png"},{a:"ม้า",e:"🐴",img:"animal/horse.png"},{a:"กระต่าย",e:"🐰",img:"animal/rabbit.png"},{a:"หมู",e:"🐷",img:"animal/pig.png"},{a:"วัว",e:"🐮",img:"animal/cow.png"},{a:"ไก่",e:"🐔",img:"animal/chicken.png"},{a:"เป็ด",e:"🦆",img:"animal/duck.png"},{a:"แกะ",e:"🐑",img:"animal/sheep.png"},{a:"ยีราฟ",e:"🦒",img:"animal/giraffe.png"},{a:"ม้าลาย",e:"🦓",img:"animal/zebra.png"},{a:"ลิง",e:"🐵",img:"animal/monkey.png"},{a:"หมาป่า",e:"🐺",img:"animal/wolf.png"},{a:"จิ้งจอก",e:"🦊",img:"animal/fox.png"},{a:"แพนด้า",e:"🐼",img:"animal/panda.png"},{a:"โคอาลา",e:"🐨",img:"animal/koala.png"},{a:"จิงโจ้",e:"🦘",img:"animal/kangaroo.png"},{a:"เพนกวิน",e:"🐧",img:"animal/penguin.png"},{a:"นกฮูก",e:"🦉",img:"animal/owl.png"},{a:"นกยูง",e:"🦚",img:"animal/peacock.png"},{a:"ฟลามิงโก",e:"🦩",img:"animal/flamingo.png"},{a:"โลมา",e:"🐬",img:"animal/dolphin.png"},{a:"ฉลาม",e:"🦈",img:"animal/shark.png"},{a:"ปลาวาฬ",e:"🐳",img:"animal/whale.png"},{a:"เต่า",e:"🐢",img:"animal/turtle.png"},{a:"งู",e:"🐍",img:"animal/snake.png"},{a:"จระเข้",e:"🐊",img:"animal/crocodile.png"},{a:"กิ้งก่า",e:"🦎",img:"animal/lizard.png"},{a:"แมงมุม",e:"🕷️",img:"animal/spider.png"},{a:"ผีเสื้อ",e:"🦋",img:"animal/butterfly.png"},{a:"แมงป่อง",e:"🦂",img:"animal/scorpion.png"},{a:"ปู",e:"🦀",img:"animal/crab.png"},{a:"กุ้ง",e:"🦐",img:"animal/shrimp.png"},{a:"ปลาหมึก",e:"🐙",img:"animal/octopus.png"},{a:"เม่น",e:"🦔",img:"animal/hedgehog.png"},{a:"ตัวลิ่น",e:"🦡",img:"animal/pangolin.png"},{a:"ตัวกินมด",e:"🐜",img:"animal/anteater.png"},{a:"คาปิบารา",e:"🦫",img:"animal/capybara.png"},{a:"อัลปากา",e:"🦙",img:"animal/alpaca.png"},{a:"สลอท",e:"🦥",img:"animal/sloth.png"},{a:"นาก",e:"🦦",img:"animal/otter.png"},{a:"มีร์แคต",e:"🦨",img:"animal/meerkat.png"},{a:"อาร์มาดิลโล",e:"🐾",img:"animal/armadillo.png"},{a:"เลเมอร์",e:"🐒",img:"animal/lemur.png"},{a:"ตุ่นปากเป็ด",e:"🦫",img:"animal/platypus.png"},{a:"กอริลลา",e:"🦍",img:"animal/gorilla.png"},{a:"อุรังอุตัง",e:"🦧",img:"animal/orangutan.png"},{a:"นกทูแคน",e:"🦜",img:"animal/toucan.png"},{a:"นกกระจอกเทศ",e:"🦤",img:"animal/ostrich.png"},{a:"นกเงือก",e:"🐦",img:"animal/hornbill.png"},{a:"ม้าน้ำ",e:"🐠",img:"animal/seahorse.png"},{a:"แมงกะพรุน",e:"🪼",img:"animal/jellyfish.png"},{a:"วอลรัส",e:"🦭",img:"animal/walrus.png"},{a:"แมวน้ำ",e:"🦭",img:"animal/seal.png"},{a:"ไฮยีน่า",e:"🐺",img:"animal/hyena.png"},{a:"สมเสร็จ",e:"🐗",img:"animal/tapir.png"}],
   "ผักผลไม้":[
     {a:"แอปเปิล",e:"🍎",img:"fruitveg/apple.png"},{a:"กล้วย",e:"🍌",img:"fruitveg/banana.png"},{a:"องุ่น",e:"🍇",img:"fruitveg/grape.png"},{a:"แตงโม",e:"🍉",img:"fruitveg/watermelon.png"},
@@ -1123,18 +1124,19 @@ function buildMatches(){
   assignTourCats(list);
   return list;
 }
-/* สุ่มหมวดให้แต่ละแมตช์ล่วงหน้า: หมวดเดียวห้ามเกิน 2 รอบ + กระจายให้ทั่ว */
+/* สุ่มหมวดให้แต่ละแมตช์ล่วงหน้า:
+   ล็อกให้ "ธงประเทศ" เป็นหมวดเดียวที่ถูกสุ่มซ้ำ 2 รอบ (มี 120 ธง พอ 2 แมตช์ไม่ซ้ำ)
+   หมวดอื่นทุกหมวดปรากฏ 1 รอบ. ตำแหน่งในตารางสุ่มสลับ */
 function assignTourCats(matches){
   const cats=Object.keys(DECKS);
-  const counts={}; cats.forEach(c=>counts[c]=0);
-  matches.forEach(m=>{
-    let avail=cats.filter(c=>counts[c]<2);          // กันเกิน 2 รอบ/หมวด
-    if(!avail.length) avail=cats.slice();
-    const min=Math.min(...avail.map(c=>counts[c]));  // เลือกหมวดที่ถูกใช้น้อยสุดก่อน
-    const pref=avail.filter(c=>counts[c]===min);
-    const c=pref[Math.random()*pref.length|0];
-    counts[c]++; m.cat=c;
-  });
+  const DUP='ธงประเทศ';
+  let slots=cats.slice();                            // ทุกหมวด 1 รอบ
+  if(cats.indexOf(DUP)>=0) slots.push(DUP);          // ธงซ้ำอีก 1 รอบ = หมวดเดียวที่ได้ 2 รอบ
+  while(slots.length<matches.length)                 // เผื่อแมตช์มากกว่าหมวด → เติมแบบสุ่ม
+    slots.push(cats[Math.random()*cats.length|0]);
+  if(slots.length>matches.length) slots=slots.slice(0,matches.length);
+  shuffle(slots);
+  matches.forEach((m,i)=>{ m.cat=slots[i]; });
 }
 function saveTour(){ try{localStorage.setItem('pbgame_tour',JSON.stringify(TOUR));}catch(e){} }
 function loadTour(){ try{const s=localStorage.getItem('pbgame_tour'); return s?JSON.parse(s):null;}catch(e){return null;} }
