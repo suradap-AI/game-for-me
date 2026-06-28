@@ -312,6 +312,9 @@
     background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.3); color:#fff; font-size:22px;
     display:none; align-items:center; justify-content:center; cursor:pointer;}
   .gear.on{display:flex;}
+  .mutebtn{position:absolute; top:14px; right:14px; z-index:9; width:46px; height:46px; border-radius:50%;
+    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.3); color:#fff; font-size:22px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none;}
   .gmenu{position:absolute; top:68px; left:14px; z-index:8; background:#0e1b3a;
     border:1px solid rgba(255,255,255,.2); border-radius:14px; padding:8px; display:none;
     flex-direction:column; gap:6px; min-width:210px; box-shadow:0 12px 30px rgba(0,0,0,.5);}
@@ -472,6 +475,7 @@
       <div class="tz blue" onclick="tapZone('blue')"><span class="hint">🔵 แตะ = ฟ้าถูก</span></div>
     </div>
     <div class="gear" id="gear" onclick="toggleMenu()">⚙</div>
+    <div class="mutebtn" id="muteBtn" onclick="audioToggle()" title="เปิด/ปิดเสียง">🔊</div>
     <div class="gmenu" id="gmenu">
       <button onclick="toggleHints()">👁 แสดง/ซ่อน เส้นโซนแตะ</button>
       <button onclick="toggleSoloButtons()">🔘 แสดง/ซ่อน ปุ่มด้านล่าง</button>
@@ -775,7 +779,7 @@ function broadcast(snap){
 }
 
 function pickRole(r){
-  ROLE=r;
+  ROLE=r; audioUnlock();
   if(r==='player'){ startPlayerPeer(); }
   else if(r==='admin'){ show('join'); setTimeout(()=>{const j=document.getElementById('joinCode'); if(j) j.focus();},120); }
   else { /* solo */
@@ -1018,6 +1022,76 @@ function toggleSoloButtons(){
   closeMenu();
 }
 
+/* ============ AUDIO (สังเคราะห์เสียงในโค้ด · Web Audio API · ไม่มีไฟล์) ============ */
+const AUDIO={ctx:null,master:null,bgm:null,on:true,bgmTimer:null,bgmStep:0,playing:false};
+function audioInit(){
+  if(AUDIO.ctx) return;
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    AUDIO.ctx=new AC();
+    AUDIO.master=AUDIO.ctx.createGain(); AUDIO.master.gain.value=AUDIO.on?0.9:0; AUDIO.master.connect(AUDIO.ctx.destination);
+    AUDIO.bgm=AUDIO.ctx.createGain(); AUDIO.bgm.gain.value=0; AUDIO.bgm.connect(AUDIO.master);
+  }catch(e){}
+}
+function audioUnlock(){ audioInit(); if(AUDIO.ctx&&AUDIO.ctx.state==='suspended'){ try{AUDIO.ctx.resume();}catch(e){} } }
+function audioToggle(){
+  AUDIO.on=!AUDIO.on; audioUnlock();
+  if(AUDIO.master) AUDIO.master.gain.setTargetAtTime(AUDIO.on?0.9:0, AUDIO.ctx.currentTime, 0.04);
+  const b=document.getElementById('muteBtn'); if(b) b.textContent=AUDIO.on?'🔊':'🔇';
+}
+function tone(freq,t0,dur,type,vol,dest){
+  const c=AUDIO.ctx; if(!c) return;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type||'sine'; o.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.3,t0+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g); g.connect(dest||AUDIO.master);
+  o.start(t0); o.stop(t0+dur+0.03);
+}
+function notes(seq,type,vol){ const c=AUDIO.ctx; if(!c) return; const t=c.currentTime;
+  seq.forEach(n=>tone(n[0],t+n[1],n[2]||0.18,type||'sine',vol||0.3)); }
+const NF={C5:523,D5:587,E5:659,F5:698,G5:784,A5:880,B5:988,C6:1047,E6:1319,G6:1568,G4:392,C4:262};
+function sfxCorrect(){ notes([[NF.E5,0,0.1],[NF.G5,0.07,0.1],[NF.C6,0.14,0.18]],'triangle',0.32); }
+function sfxSkip(){ notes([[NF.D5,0,0.12],[NF.G4,0.08,0.16]],'sine',0.22); }
+function sfxBeep(n){ if(n===0) notes([[NF.C6,0,0.3]],'square',0.3); else notes([[NF.A5,0,0.14]],'square',0.22); }
+function sfxStart(){ notes([[NF.C5,0,0.08],[NF.E5,0.06,0.08],[NF.G5,0.12,0.08],[NF.C6,0.18,0.22]],'triangle',0.28); }
+function sfxWinner(){ notes([[NF.G5,0,0.16],[NF.C6,0.16,0.16],[NF.E6,0.32,0.16],[NF.G6,0.48,0.4],[NF.C6,0.62,0.5]],'triangle',0.34); }
+function sfxTick(){ notes([[660+Math.random()*220,0,0.05]],'square',0.10); }
+function sfxReveal(){ notes([[NF.E5,0,0.08],[NF.B5,0.06,0.18]],'triangle',0.26); }
+function bgmStart(){
+  if(!AUDIO.ctx||AUDIO.playing) return; AUDIO.playing=true; AUDIO.bgmStep=0;
+  AUDIO.bgm.gain.setTargetAtTime(0.16,AUDIO.ctx.currentTime,0.5);
+  const root=220, arp=[0,4,7,12,7,4], bass=[0,0,5,7];
+  AUDIO.bgmTimer=setInterval(()=>{
+    if(!AUDIO.ctx) return; const t=AUDIO.ctx.currentTime, s=AUDIO.bgmStep;
+    if(s%2===0) tone((root/2)*Math.pow(2,bass[(s/2)%4|0]/12), t, 0.55,'triangle',0.5,AUDIO.bgm);
+    tone(root*Math.pow(2,arp[s%arp.length]/12), t, 0.22,'sine',0.5,AUDIO.bgm);
+    AUDIO.bgmStep++;
+  },250);
+}
+function bgmStop(){
+  if(!AUDIO.playing) return; AUDIO.playing=false;
+  if(AUDIO.bgm) AUDIO.bgm.gain.setTargetAtTime(0,AUDIO.ctx.currentTime,0.3);
+  clearInterval(AUDIO.bgmTimer); AUDIO.bgmTimer=null;
+}
+function audioDrive(s){
+  if(!AUDIO.ctx) return;
+  const P=audioDrive._p||{phase:'',paused:false,cd:null,reveal:false,score:{red:0,blue:0}};
+  const sc=s.score||{red:0,blue:0};
+  // BGM เปิดเฉพาะตอนเล่นจริง (ไม่พัก/ไม่จบ)
+  if(s.phase==='playing'&&!s.paused) bgmStart(); else bgmStop();
+  // นับถอยหลัง 3-2-1
+  if(s.countdown!=null&&s.countdown!==''&&s.countdown!==P.cd) sfxBeep(s.countdown);
+  // เริ่มสุ่มหมวด
+  if(s.phase==='draw'&&P.phase!=='draw') sfxStart();
+  // ตอบถูก / ข้าม (ตอนเข้าโหมดเฉลย)
+  if(s.reveal&&!P.reveal){ if(sc.red>P.score.red||sc.blue>P.score.blue) sfxCorrect(); else sfxSkip(); }
+  // จบเกม → แฟนแฟร์
+  if(s.phase==='ended'&&P.phase!=='ended') sfxWinner();
+  audioDrive._p={phase:s.phase,paused:!!s.paused,cd:s.countdown,reveal:!!s.reveal,score:{red:sc.red,blue:sc.blue}};
+}
+
 /* ============ RENDER: DISPLAY (player & solo) ============ */
 function renderDisplay(s){
   s=s||{};
@@ -1097,6 +1171,7 @@ function renderDisplay(s){
   }
   // flash
   if(s.flash){ const f=document.getElementById('dFlash'); f.className='flash '+s.flash; void f.offsetWidth; f.className='flash '+s.flash+' go'; }
+  audioDrive(s);
 }
 
 /* ============ RENDER: ADMIN PANEL ============ */
@@ -1224,7 +1299,8 @@ function spinSlot(slot, finalHTML, color){
   const iv=setInterval(()=>{
     const a=gk[Math.random()*gk.length|0], b=gk[Math.random()*gk.length|0];
     slot.innerHTML='<div class="brk-g brk-spin">กลุ่ม '+a+' <span class="brk-vs2">พบ</span> กลุ่ม '+b+'</div>';
-    if(++n>=7){ clearInterval(iv); slot.innerHTML=finalHTML; void slot.offsetWidth; slot.classList.add('pop'); }
+    sfxTick();
+    if(++n>=7){ clearInterval(iv); slot.innerHTML=finalHTML; void slot.offsetWidth; slot.classList.add('pop'); sfxReveal(); }
   },65);
 }
 function renderBracketReveal(s){
@@ -1257,8 +1333,10 @@ function renderBracketReveal(s){
       spinSlot(col.children[idx], html, tag==='A'?'red':'blue');
     }
   }
-  document.getElementById('brkSub').textContent=(s.shown>=(s.total||order.length))
+  const done=(s.shown>=(s.total||order.length));
+  document.getElementById('brkSub').textContent=done
     ? 'จับคู่ครบแล้ว — รวม 7 แมตช์ (สายละ 3 คู่ + รอบชิง 1)' : 'กำลังจับคู่…';
+  if(done && s.drawId!==renderBracketReveal._fanfare){ renderBracketReveal._fanfare=s.drawId; setTimeout(sfxWinner,650); }
 }
 
 /* ---- standings (per สาย) ---- */
