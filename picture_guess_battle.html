@@ -1059,6 +1059,9 @@ function sfxStart(){ notes([[NF.C5,0,0.08],[NF.E5,0.06,0.08],[NF.G5,0.12,0.08],[
 function sfxWinner(){ notes([[NF.G5,0,0.16],[NF.C6,0.16,0.16],[NF.E6,0.32,0.16],[NF.G6,0.48,0.4],[NF.C6,0.62,0.5]],'triangle',0.34); }
 function sfxTick(){ notes([[660+Math.random()*220,0,0.05]],'square',0.10); }
 function sfxReveal(){ notes([[NF.E5,0,0.08],[NF.B5,0.06,0.18]],'triangle',0.26); }
+/* เสียงสล็อตหมุนหมวด: ติ๊กไต่เสียงสูงตามความช้าลง + ปังตอนหยุด */
+function sfxReelTick(p){ const f=440+Math.min(1,p||0)*620; notes([[f,0,0.045]],'square',0.13); }
+function sfxReelHit(){ notes([[NF.C5,0,0.1],[NF.E5,0.07,0.1],[NF.G5,0.14,0.12],[NF.C6,0.21,0.32]],'triangle',0.36); }
 function bgmStart(){
   if(!AUDIO.ctx||AUDIO.playing) return; AUDIO.playing=true; AUDIO.bgmStep=0;
   AUDIO.bgm.gain.setTargetAtTime(0.16,AUDIO.ctx.currentTime,0.5);
@@ -1518,9 +1521,10 @@ function spinReel(el, target, onDone){
   el.classList.remove('reel-hit');
   const step=()=>{
     el.textContent='🎲 '+cats[Math.random()*cats.length|0];
+    sfxReelTick(elapsed/2300);
     elapsed+=delay;
     if(elapsed<2300){ delay=55+(elapsed/2300)*210; setTimeout(step,delay); }
-    else { el.textContent='🎯 '+target; el.classList.add('reel-hit'); if(onDone) setTimeout(onDone,600); }
+    else { el.textContent='🎯 '+target; el.classList.add('reel-hit'); sfxReelHit(); if(onDone) setTimeout(onDone,600); }
   };
   step();
 }
