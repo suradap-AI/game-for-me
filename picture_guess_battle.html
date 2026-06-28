@@ -190,6 +190,25 @@
     70%{transform:scale(1); opacity:1;}100%{transform:scale(.9); opacity:.85;}}
   @keyframes cdspin{to{transform:rotate(360deg);}}
 
+  /* สล็อตสุ่มหมวด */
+  #oDraw{position:absolute; inset:0; z-index:9; display:none; flex-direction:column; align-items:center; justify-content:center; gap:26px;
+    background:radial-gradient(circle at 50% 40%, rgba(12,22,52,.7), rgba(5,11,28,.96)); backdrop-filter:blur(14px);}
+  #oDraw.show{display:flex;}
+  #oDraw .draw-label{font-size:24px; font-weight:800; letter-spacing:3px; color:var(--gold);
+    text-shadow:0 0 26px rgba(244,196,59,.6);}
+  #oDraw .draw-frame{position:relative; min-width:min(70vw,640px); padding:34px 50px; border-radius:24px;
+    background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+    border:1px solid rgba(120,170,255,.35);
+    box-shadow:0 0 70px rgba(120,170,255,.25), inset 0 0 50px rgba(120,170,255,.12); overflow:hidden; text-align:center;}
+  #oDraw .draw-frame::before,#oDraw .draw-frame::after{content:''; position:absolute; left:0; right:0; height:34px; pointer-events:none;}
+  #oDraw .draw-frame::before{top:0; background:linear-gradient(180deg, rgba(5,11,28,.85), transparent);}
+  #oDraw .draw-frame::after{bottom:0; background:linear-gradient(0deg, rgba(5,11,28,.85), transparent);}
+  #oDraw .draw-reel{font-family:'Noto Sans Thai','Sora',sans-serif; font-weight:900; font-size:min(9vh,76px); line-height:1.1;
+    color:#fff; text-shadow:0 0 30px rgba(120,170,255,.7); white-space:nowrap;}
+  #oDraw .draw-reel.reel-hit{color:var(--gold); text-shadow:0 0 50px rgba(244,196,59,.95); animation:reelHit .6s ease-out;}
+  #oDraw .draw-sub{font-size:16px; opacity:.7; letter-spacing:1px;}
+  @keyframes reelHit{0%{transform:scale(.6); opacity:.2;}45%{transform:scale(1.18); opacity:1;}100%{transform:scale(1);}}
+
   /* solo controls */
   .controls{display:flex; gap:10px; padding:12px 14px; background:#06101f; justify-content:center; flex-wrap:wrap;}
   .controls button{padding:14px 22px; font-size:17px; font-weight:800; border:none; border-radius:12px;
@@ -441,6 +460,11 @@
       <div class="cd-ring"></div>
       <div class="cd-num" id="oCountNum">3</div>
     </div>
+    <div id="oDraw">
+      <div class="draw-label">🎰 สุ่มหมวดประจำแมตช์</div>
+      <div class="draw-frame"><div class="draw-reel" id="oDrawReel">—</div></div>
+      <div class="draw-sub">ลุ้นกันว่าจะได้หมวดอะไร…</div>
+    </div>
     <div class="overlay" id="oEnd">
       <div class="big" id="oEndWinner">ผู้ชนะ</div>
       <div class="mid" id="oEndScore"></div>
@@ -572,11 +596,14 @@
       </div>
     </div>
 
-    <div class="field" style="margin-top:14px"><label style="display:block;font-size:13px;opacity:.7;margin-bottom:6px">เลือกหมวด (เลือกได้หลายหมวด)</label>
-      <div class="cats" id="msCats"></div>
+    <div class="field" style="margin-top:14px">
+      <div style="padding:14px 16px;border-radius:14px;border:1px dashed rgba(120,170,255,.4);background:rgba(120,170,255,.07);text-align:center;font-size:14px">
+        🎰 หมวดของแมตช์นี้จะ <b>สุ่มหมุนตอนกดเริ่ม</b> — ลุ้นพร้อมกันบนจอใหญ่
+      </div>
+      <div class="cats" id="msCats" style="display:none"></div>
     </div>
 
-    <button class="startbtn" style="margin-top:18px" onclick="startTournamentMatch()">▶ เริ่มแมตช์</button>
+    <button class="startbtn" style="margin-top:18px" onclick="startTournamentMatch()">▶ เริ่มแมตช์ (สุ่มหมวด)</button>
     <div class="back" style="text-align:center;margin-top:12px;font-size:13px;opacity:.6;cursor:pointer;text-decoration:underline" onclick="show('tour')">← กลับตารางทัวร์</div>
   </div>
 </section>
@@ -586,29 +613,114 @@
    แต่ละ item:  {a:"คำตอบ", e:"emoji"}  หรือใส่ภาพจริง {a:"คำตอบ", img:"path/รูป.jpg"}  */
 const DECKS = {
   "ธงประเทศ":[
-    {a:"ไทย",e:"🇹🇭"},{a:"ญี่ปุ่น",e:"🇯🇵"},{a:"ฝรั่งเศส",e:"🇫🇷"},{a:"บราซิล",e:"🇧🇷"},
-    {a:"อังกฤษ",e:"🇬🇧"},{a:"เกาหลีใต้",e:"🇰🇷"},{a:"สหรัฐฯ",e:"🇺🇸"},{a:"อิตาลี",e:"🇮🇹"},
-    {a:"แคนาดา",e:"🇨🇦"},{a:"เยอรมนี",e:"🇩🇪"},{a:"อินเดีย",e:"🇮🇳"},{a:"จีน",e:"🇨🇳"},
-    {a:"สเปน",e:"🇪🇸"},{a:"สวิตเซอร์แลนด์",e:"🇨🇭"},{a:"ออสเตรเลีย",e:"🇦🇺"},{a:"เม็กซิโก",e:"🇲🇽"}],
+    {a:"ไทย",e:"🇹🇭",img:"images/flag/thailand.png"},{a:"ญี่ปุ่น",e:"🇯🇵",img:"images/flag/japan.png"},{a:"เกาหลีใต้",e:"🇰🇷",img:"images/flag/south-korea.png"},{a:"จีน",e:"🇨🇳",img:"images/flag/china.png"},
+    {a:"สหรัฐอเมริกา",e:"🇺🇸",img:"images/flag/usa.png"},{a:"อังกฤษ",e:"🇬🇧",img:"images/flag/uk.png"},{a:"ฝรั่งเศส",e:"🇫🇷",img:"images/flag/france.png"},{a:"เยอรมนี",e:"🇩🇪",img:"images/flag/germany.png"},
+    {a:"อิตาลี",e:"🇮🇹",img:"images/flag/italy.png"},{a:"สเปน",e:"🇪🇸",img:"images/flag/spain.png"},{a:"แคนาดา",e:"🇨🇦",img:"images/flag/canada.png"},{a:"บราซิล",e:"🇧🇷",img:"images/flag/brazil.png"},
+    {a:"อินเดีย",e:"🇮🇳",img:"images/flag/india.png"},{a:"ออสเตรเลีย",e:"🇦🇺",img:"images/flag/australia.png"},{a:"รัสเซีย",e:"🇷🇺",img:"images/flag/russia.png"},{a:"เม็กซิโก",e:"🇲🇽",img:"images/flag/mexico.png"},
+    {a:"สวิตเซอร์แลนด์",e:"🇨🇭",img:"images/flag/switzerland.png"},{a:"เนเธอร์แลนด์",e:"🇳🇱",img:"images/flag/netherlands.png"},{a:"สวีเดน",e:"🇸🇪",img:"images/flag/sweden.png"},{a:"นอร์เวย์",e:"🇳🇴",img:"images/flag/norway.png"},
+    {a:"สิงคโปร์",e:"🇸🇬",img:"images/flag/singapore.png"},{a:"มาเลเซีย",e:"🇲🇾",img:"images/flag/malaysia.png"},{a:"อินโดนีเซีย",e:"🇮🇩",img:"images/flag/indonesia.png"},{a:"เวียดนาม",e:"🇻🇳",img:"images/flag/vietnam.png"},
+    {a:"ฟิลิปปินส์",e:"🇵🇭",img:"images/flag/philippines.png"},{a:"ลาว",e:"🇱🇦",img:"images/flag/laos.png"},{a:"กัมพูชา",e:"🇰🇭",img:"images/flag/cambodia.png"},{a:"เมียนมา",e:"🇲🇲",img:"images/flag/myanmar.png"},
+    {a:"อาร์เจนตินา",e:"🇦🇷",img:"images/flag/argentina.png"},{a:"โปรตุเกส",e:"🇵🇹",img:"images/flag/portugal.png"},{a:"กรีซ",e:"🇬🇷",img:"images/flag/greece.png"},{a:"ตุรกี",e:"🇹🇷",img:"images/flag/turkey.png"},
+    {a:"อียิปต์",e:"🇪🇬",img:"images/flag/egypt.png"},{a:"แอฟริกาใต้",e:"🇿🇦",img:"images/flag/south-africa.png"},{a:"ซาอุดีอาระเบีย",e:"🇸🇦",img:"images/flag/saudi-arabia.png"},{a:"สหรัฐอาหรับเอมิเรตส์",e:"🇦🇪",img:"images/flag/uae.png"},
+    {a:"นิวซีแลนด์",e:"🇳🇿",img:"images/flag/new-zealand.png"},{a:"ไอร์แลนด์",e:"🇮🇪",img:"images/flag/ireland.png"},{a:"เบลเยียม",e:"🇧🇪",img:"images/flag/belgium.png"},{a:"ออสเตรีย",e:"🇦🇹",img:"images/flag/austria.png"},
+    {a:"โปแลนด์",e:"🇵🇱",img:"images/flag/poland.png"},{a:"เดนมาร์ก",e:"🇩🇰",img:"images/flag/denmark.png"},{a:"ฟินแลนด์",e:"🇫🇮",img:"images/flag/finland.png"},{a:"ไต้หวัน",e:"🇹🇼",img:"images/flag/taiwan.png"},
+    {a:"ฮ่องกง",e:"🇭🇰",img:"images/flag/hong-kong.png"},{a:"ชิลี",e:"🇨🇱",img:"images/flag/chile.png"},{a:"โคลอมเบีย",e:"🇨🇴",img:"images/flag/colombia.png"},{a:"ยูเครน",e:"🇺🇦",img:"images/flag/ukraine.png"},
+    {a:"อิสราเอล",e:"🇮🇱",img:"images/flag/israel.png"},{a:"กาตาร์",e:"🇶🇦",img:"images/flag/qatar.png"},{a:"ปากีสถาน",e:"🇵🇰",img:"images/flag/pakistan.png"},{a:"อิหร่าน",e:"🇮🇷",img:"images/flag/iran.png"},
+    {a:"อิรัก",e:"🇮🇶",img:"images/flag/iraq.png"},{a:"คูเวต",e:"🇰🇼",img:"images/flag/kuwait.png"},{a:"โมร็อกโก",e:"🇲🇦",img:"images/flag/morocco.png"},{a:"คิวบา",e:"🇨🇺",img:"images/flag/cuba.png"},
+    {a:"เปรู",e:"🇵🇪",img:"images/flag/peru.png"},{a:"ฮังการี",e:"🇭🇺",img:"images/flag/hungary.png"},{a:"โรมาเนีย",e:"🇷🇴",img:"images/flag/romania.png"},{a:"สาธารณรัฐเช็ก",e:"🇨🇿",img:"images/flag/czech.png"}],
+  "สัตว์":[{a:"หมา",e:"🐶",img:"images/animal/dog.png"},{a:"แมว",e:"🐱",img:"images/animal/cat.png"},{a:"ช้าง",e:"🐘",img:"images/animal/elephant.png"},{a:"สิงโต",e:"🦁",img:"images/animal/lion.png"},{a:"เสือ",e:"🐯",img:"images/animal/tiger.png"},{a:"หมี",e:"🐻",img:"images/animal/bear.png"},{a:"ม้า",e:"🐴",img:"images/animal/horse.png"},{a:"กระต่าย",e:"🐰",img:"images/animal/rabbit.png"},{a:"หมู",e:"🐷",img:"images/animal/pig.png"},{a:"วัว",e:"🐮",img:"images/animal/cow.png"},{a:"ไก่",e:"🐔",img:"images/animal/chicken.png"},{a:"เป็ด",e:"🦆",img:"images/animal/duck.png"},{a:"แกะ",e:"🐑",img:"images/animal/sheep.png"},{a:"ยีราฟ",e:"🦒",img:"images/animal/giraffe.png"},{a:"ม้าลาย",e:"🦓",img:"images/animal/zebra.png"},{a:"ลิง",e:"🐵",img:"images/animal/monkey.png"},{a:"หมาป่า",e:"🐺",img:"images/animal/wolf.png"},{a:"จิ้งจอก",e:"🦊",img:"images/animal/fox.png"},{a:"แพนด้า",e:"🐼",img:"images/animal/panda.png"},{a:"โคอาลา",e:"🐨",img:"images/animal/koala.png"},{a:"จิงโจ้",e:"🦘",img:"images/animal/kangaroo.png"},{a:"เพนกวิน",e:"🐧",img:"images/animal/penguin.png"},{a:"นกฮูก",e:"🦉",img:"images/animal/owl.png"},{a:"นกยูง",e:"🦚",img:"images/animal/peacock.png"},{a:"ฟลามิงโก",e:"🦩",img:"images/animal/flamingo.png"},{a:"โลมา",e:"🐬",img:"images/animal/dolphin.png"},{a:"ฉลาม",e:"🦈",img:"images/animal/shark.png"},{a:"ปลาวาฬ",e:"🐳",img:"images/animal/whale.png"},{a:"เต่า",e:"🐢",img:"images/animal/turtle.png"},{a:"งู",e:"🐍",img:"images/animal/snake.png"},{a:"จระเข้",e:"🐊",img:"images/animal/crocodile.png"},{a:"กิ้งก่า",e:"🦎",img:"images/animal/lizard.png"},{a:"แมงมุม",e:"🕷️",img:"images/animal/spider.png"},{a:"ผีเสื้อ",e:"🦋",img:"images/animal/butterfly.png"},{a:"แมงป่อง",e:"🦂",img:"images/animal/scorpion.png"},{a:"ปู",e:"🦀",img:"images/animal/crab.png"},{a:"กุ้ง",e:"🦐",img:"images/animal/shrimp.png"},{a:"ปลาหมึก",e:"🐙",img:"images/animal/octopus.png"},{a:"เม่น",e:"🦔",img:"images/animal/hedgehog.png"},{a:"ตัวลิ่น",e:"🦡",img:"images/animal/pangolin.png"},{a:"ตัวกินมด",e:"🐜",img:"images/animal/anteater.png"},{a:"คาปิบารา",e:"🦫",img:"images/animal/capybara.png"},{a:"อัลปากา",e:"🦙",img:"images/animal/alpaca.png"},{a:"สลอท",e:"🦥",img:"images/animal/sloth.png"},{a:"นาก",e:"🦦",img:"images/animal/otter.png"},{a:"มีร์แคต",e:"🦨",img:"images/animal/meerkat.png"},{a:"อาร์มาดิลโล",e:"🐾",img:"images/animal/armadillo.png"},{a:"เลเมอร์",e:"🐒",img:"images/animal/lemur.png"},{a:"ตุ่นปากเป็ด",e:"🦫",img:"images/animal/platypus.png"},{a:"กอริลลา",e:"🦍",img:"images/animal/gorilla.png"},{a:"อุรังอุตัง",e:"🦧",img:"images/animal/orangutan.png"},{a:"นกทูแคน",e:"🦜",img:"images/animal/toucan.png"},{a:"นกกระจอกเทศ",e:"🦤",img:"images/animal/ostrich.png"},{a:"นกเงือก",e:"🐦",img:"images/animal/hornbill.png"},{a:"ม้าน้ำ",e:"🐠",img:"images/animal/seahorse.png"},{a:"แมงกะพรุน",e:"🪼",img:"images/animal/jellyfish.png"},{a:"วอลรัส",e:"🦭",img:"images/animal/walrus.png"},{a:"แมวน้ำ",e:"🦭",img:"images/animal/seal.png"},{a:"ไฮยีน่า",e:"🐺",img:"images/animal/hyena.png"},{a:"สมเสร็จ",e:"🐗",img:"images/animal/tapir.png"}],
+  "ผักผลไม้":[
+    {a:"แอปเปิล",e:"🍎",img:"images/fruitveg/apple.png"},{a:"กล้วย",e:"🍌",img:"images/fruitveg/banana.png"},{a:"องุ่น",e:"🍇",img:"images/fruitveg/grape.png"},{a:"แตงโม",e:"🍉",img:"images/fruitveg/watermelon.png"},
+    {a:"สตรอว์เบอร์รี",e:"🍓",img:"images/fruitveg/strawberry.png"},{a:"สับปะรด",e:"🍍",img:"images/fruitveg/pineapple.png"},{a:"ส้ม",e:"🍊",img:"images/fruitveg/orange.png"},{a:"เชอร์รี",e:"🍒",img:"images/fruitveg/cherry.png"},
+    {a:"พีช",e:"🍑",img:"images/fruitveg/peach.png"},{a:"มะพร้าว",e:"🥥",img:"images/fruitveg/coconut.png"},{a:"กีวี",e:"🥝",img:"images/fruitveg/kiwi.png"},{a:"มะม่วง",e:"🥭",img:"images/fruitveg/mango.png"},
+    {a:"เลมอน",e:"🍋",img:"images/fruitveg/lemon.png"},{a:"สาลี่",e:"🍐",img:"images/fruitveg/pear.png"},{a:"เมลอน",e:"🍈",img:"images/fruitveg/melon.png"},{a:"บลูเบอร์รี",e:"🫐",img:"images/fruitveg/blueberry.png"},
+    {a:"มะเขือเทศ",e:"🍅",img:"images/fruitveg/tomato.png"},{a:"มะกอก",e:"🫒",img:"images/fruitveg/olive.png"},{a:"อะโวคาโด",e:"🥑",img:"images/fruitveg/avocado.png"},{a:"แครอท",e:"🥕",img:"images/fruitveg/carrot.png"},
+    {a:"ข้าวโพด",e:"🌽",img:"images/fruitveg/corn.png"},{a:"บรอกโคลี",e:"🥦",img:"images/fruitveg/broccoli.png"},{a:"ผักกาด",e:"🥬",img:"images/fruitveg/lettuce.png"},{a:"แตงกวา",e:"🥒",img:"images/fruitveg/cucumber.png"},
+    {a:"พริก",e:"🌶️",img:"images/fruitveg/chili.png"},{a:"พริกหยวก",e:"🫑",img:"images/fruitveg/bell-pepper.png"},{a:"กระเทียม",e:"🧄",img:"images/fruitveg/garlic.png"},{a:"หัวหอม",e:"🧅",img:"images/fruitveg/onion.png"},
+    {a:"มันฝรั่ง",e:"🥔",img:"images/fruitveg/potato.png"},{a:"มันเทศ",e:"🍠",img:"images/fruitveg/sweet-potato.png"},{a:"มะเขือม่วง",e:"🍆",img:"images/fruitveg/eggplant.png"},{a:"เห็ด",e:"🍄",img:"images/fruitveg/mushroom.png"},
+    {a:"ถั่วลันเตา",e:"🫛",img:"images/fruitveg/peas.png"},{a:"ถั่วลิสง",e:"🥜",img:"images/fruitveg/peanut.png"},{a:"เกาลัด",e:"🌰",img:"images/fruitveg/chestnut.png"},{a:"ขิง",e:"🫚",img:"images/fruitveg/ginger.png"},
+    {a:"ถั่ว",e:"🫘",img:"images/fruitveg/bean.png"},{a:"ผักใบเขียว",e:"🥗",img:"images/fruitveg/leafy-greens.png"},
+    {a:"ทุเรียน",e:"🍈",img:"images/fruitveg/durian.png"},{a:"มังคุด",e:"🟣",img:"images/fruitveg/mangosteen.png"},{a:"เงาะ",e:"🔴",img:"images/fruitveg/rambutan.png"},{a:"ลำไย",e:"🟤",img:"images/fruitveg/longan.png"},{a:"ลิ้นจี่",e:"🌸",img:"images/fruitveg/lychee.png"},{a:"ส้มโอ",e:"🍊",img:"images/fruitveg/pomelo.png"},{a:"ฝรั่ง",e:"🟢",img:"images/fruitveg/guava.png"},{a:"ชมพู่",e:"🔔",img:"images/fruitveg/rose-apple.png"},{a:"น้อยหน่า",e:"🟩",img:"images/fruitveg/custard-apple.png"},{a:"ขนุน",e:"🟡",img:"images/fruitveg/jackfruit.png"},{a:"มะละกอ",e:"🟠",img:"images/fruitveg/papaya.png"},{a:"แก้วมังกร",e:"🐉",img:"images/fruitveg/dragon-fruit.png"},{a:"เสาวรส",e:"🟪",img:"images/fruitveg/passion-fruit.png"},{a:"ทับทิม",e:"🔴",img:"images/fruitveg/pomegranate.png"},{a:"ฟักทอง",e:"🎃",img:"images/fruitveg/pumpkin.png"},{a:"กะหล่ำปลี",e:"🥬",img:"images/fruitveg/cabbage.png"},{a:"ผักบุ้ง",e:"🥬",img:"images/fruitveg/morning-glory.png"},{a:"คะน้า",e:"🥬",img:"images/fruitveg/chinese-kale.png"},{a:"ถั่วฝักยาว",e:"🫛",img:"images/fruitveg/yardlong-bean.png"},{a:"หัวไชเท้า",e:"🥕",img:"images/fruitveg/radish.png"},{a:"ตะไคร้",e:"🌿",img:"images/fruitveg/lemongrass.png"},{a:"ข่า",e:"🫚",img:"images/fruitveg/galangal.png"}],
   "อาหาร":[
-    {a:"แอปเปิล",e:"🍎"},{a:"พิซซ่า",e:"🍕"},{a:"ซูชิ",e:"🍣"},{a:"เบอร์เกอร์",e:"🍔"},
-    {a:"ราเมง",e:"🍜"},{a:"ครัวซองต์",e:"🥐"},{a:"ทาโก้",e:"🌮"},{a:"ไอศกรีม",e:"🍦"},
-    {a:"โดนัท",e:"🍩"},{a:"สลัด",e:"🥗"},{a:"พาสต้า",e:"🍝"},{a:"กุ้ง",e:"🍤"},
-    {a:"เค้ก",e:"🍰"},{a:"ข้าวปั้น",e:"🍙"},{a:"ไก่ทอด",e:"🍗"},{a:"แพนเค้ก",e:"🥞"}],
-  "สัตว์":[
-    {a:"หมา",e:"🐶"},{a:"แมว",e:"🐱"},{a:"สิงโต",e:"🦁"},{a:"ช้าง",e:"🐘"},
-    {a:"เพนกวิน",e:"🐧"},{a:"ยีราฟ",e:"🦒"},{a:"เต่า",e:"🐢"},{a:"จิ้งจอก",e:"🦊"},
-    {a:"แพนด้า",e:"🐼"},{a:"นกอินทรี",e:"🦅"},{a:"ปลาหมึก",e:"🐙"},{a:"ผีเสื้อ",e:"🦋"},
-    {a:"ม้า",e:"🐴"},{a:"กบ",e:"🐸"},{a:"ฉลาม",e:"🦈"},{a:"ผึ้ง",e:"🐝"}],
-  "ผลไม้":[
-    {a:"กล้วย",e:"🍌"},{a:"องุ่น",e:"🍇"},{a:"แตงโม",e:"🍉"},{a:"สตรอว์เบอร์รี",e:"🍓"},
-    {a:"สับปะรด",e:"🍍"},{a:"ส้ม",e:"🍊"},{a:"เชอร์รี",e:"🍒"},{a:"พีช",e:"🍑"},
-    {a:"มะพร้าว",e:"🥥"},{a:"กีวี",e:"🥝"},{a:"มะม่วง",e:"🥭"},{a:"เลมอน",e:"🍋"}],
-  "ยานพาหนะ":[
-    {a:"รถยนต์",e:"🚗"},{a:"เครื่องบิน",e:"✈️"},{a:"จักรยาน",e:"🚲"},{a:"เรือ",e:"⛵"},
-    {a:"รถไฟ",e:"🚆"},{a:"จรวด",e:"🚀"},{a:"เฮลิคอปเตอร์",e:"🚁"},{a:"รถบัส",e:"🚌"},
-    {a:"มอเตอร์ไซค์",e:"🏍️"},{a:"รถดับเพลิง",e:"🚒"},{a:"แทรกเตอร์",e:"🚜"},{a:"รถตำรวจ",e:"🚓"}]
+    {a:"พิซซ่า",e:"🍕",img:"images/food/pizza.png"},{a:"เบอร์เกอร์",e:"🍔",img:"images/food/burger.png"},{a:"ฮอทดอก",e:"🌭",img:"images/food/hotdog.png"},{a:"เฟรนช์ฟราย",e:"🍟",img:"images/food/fries.png"},
+    {a:"ป๊อปคอร์น",e:"🍿",img:"images/food/popcorn.png"},{a:"เบคอน",e:"🥓",img:"images/food/bacon.png"},{a:"ไข่ดาว",e:"🍳",img:"images/food/fried-egg.png"},{a:"แพนเค้ก",e:"🥞",img:"images/food/pancake.png"},
+    {a:"วาฟเฟิล",e:"🧇",img:"images/food/waffle.png"},{a:"ชีส",e:"🧀",img:"images/food/cheese.png"},{a:"เพรทเซล",e:"🥨",img:"images/food/pretzel.png"},{a:"ครัวซองต์",e:"🥐",img:"images/food/croissant.png"},
+    {a:"ขนมปัง",e:"🍞",img:"images/food/bread.png"},{a:"เบเกิล",e:"🥯",img:"images/food/bagel.png"},{a:"แซนด์วิช",e:"🥪",img:"images/food/sandwich.png"},{a:"ทาโก้",e:"🌮",img:"images/food/taco.png"},
+    {a:"เบอร์ริโต",e:"🌯",img:"images/food/burrito.png"},{a:"เคบับ",e:"🥙",img:"images/food/kebab.png"},{a:"ฟาลาเฟล",e:"🧆",img:"images/food/falafel.png"},{a:"ราเมง",e:"🍜",img:"images/food/ramen.png"},
+    {a:"หม้อไฟ",e:"🍲",img:"images/food/hotpot.png"},{a:"สปาเกตตี",e:"🍝",img:"images/food/spaghetti.png"},{a:"แกงกะหรี่",e:"🍛",img:"images/food/curry.png"},{a:"ซูชิ",e:"🍣",img:"images/food/sushi.png"},
+    {a:"ข้าวกล่อง",e:"🍱",img:"images/food/bento.png"},{a:"ข้าวปั้น",e:"🍙",img:"images/food/onigiri.png"},{a:"ข้าวเกรียบ",e:"🍘",img:"images/food/rice-cracker.png"},{a:"ข้าวสวย",e:"🍚",img:"images/food/rice.png"},
+    {a:"โอเด้ง",e:"🍢",img:"images/food/oden.png"},{a:"ดังโงะ",e:"🍡",img:"images/food/dango.png"},{a:"น้ำแข็งไส",e:"🍧",img:"images/food/shaved-ice.png"},{a:"ไอศกรีมถ้วย",e:"🍨",img:"images/food/ice-cream.png"},
+    {a:"ซอฟต์ครีม",e:"🍦",img:"images/food/soft-serve.png"},{a:"เค้ก",e:"🍰",img:"images/food/cake.png"},{a:"เค้กวันเกิด",e:"🎂",img:"images/food/birthday-cake.png"},{a:"คัพเค้ก",e:"🧁",img:"images/food/cupcake.png"},
+    {a:"พาย",e:"🥧",img:"images/food/pie.png"},{a:"พุดดิ้ง",e:"🍮",img:"images/food/pudding.png"},{a:"โดนัท",e:"🍩",img:"images/food/donut.png"},{a:"คุกกี้",e:"🍪",img:"images/food/cookie.png"},
+    {a:"ช็อกโกแลต",e:"🍫",img:"images/food/chocolate.png"},{a:"ลูกอม",e:"🍬",img:"images/food/candy.png"},{a:"อมยิ้ม",e:"🍭",img:"images/food/lollipop.png"},{a:"กุ้งทอด",e:"🍤",img:"images/food/fried-shrimp.png"},
+    {a:"ไก่ทอด",e:"🍗",img:"images/food/fried-chicken.png"},{a:"ซี่โครง",e:"🍖",img:"images/food/ribs.png"},{a:"สเต๊ก",e:"🥩",img:"images/food/steak.png"},{a:"ฟองดู",e:"🫕",img:"images/food/fondue.png"},
+    {a:"นารูโตะ",e:"🍥",img:"images/food/narutomaki.png"},{a:"เกี๊ยว",e:"🥟",img:"images/food/dumpling.png"},{a:"หอยนางรม",e:"🦪",img:"images/food/oyster.png"},{a:"ชา",e:"🍵",img:"images/food/tea.png"},
+    {a:"กาแฟ",e:"☕",img:"images/food/coffee.png"},{a:"ชานมไข่มุก",e:"🧋",img:"images/food/bubble-tea.png"},{a:"น้ำอัดลม",e:"🥤",img:"images/food/soda.png"},{a:"เกลือ",e:"🧂",img:"images/food/salt.png"},
+    {a:"น้ำผึ้ง",e:"🍯",img:"images/food/honey.png"},{a:"เนย",e:"🧈",img:"images/food/butter.png"},{a:"ข้าวผัดกระทะ",e:"🥘",img:"images/food/fried-rice.png"},{a:"ไข่ต้ม",e:"🥚",img:"images/food/boiled-egg.png"}],
+  "แบรนด์":[
+    {a:"โค้ก",e:"🥤",img:"images/brand/coca-cola.png"},{a:"เป๊ปซี่",e:"🥤",img:"images/brand/pepsi.png"},
+    {a:"แมคโดนัลด์",e:"🍔",img:"images/brand/mcdonalds.png"},{a:"เคเอฟซี",e:"🍗",img:"images/brand/kfc.png"},
+    {a:"สตาร์บัคส์",e:"☕",img:"images/brand/starbucks.png"},{a:"เบอร์เกอร์คิง",e:"🍔",img:"images/brand/burger-king.png"},
+    {a:"พิซซ่าฮัท",e:"🍕",img:"images/brand/pizza-hut.png"},{a:"แอปเปิล",e:"🍏",img:"images/brand/apple.png"},
+    {a:"ซัมซุง",e:"📱",img:"images/brand/samsung.png"},{a:"กูเกิล",e:"🔍",img:"images/brand/google.png"},
+    {a:"ยูทูบ",e:"▶️",img:"images/brand/youtube.png"},{a:"เฟซบุ๊ก",e:"📘",img:"images/brand/facebook.png"},
+    {a:"อินสตาแกรม",e:"📷",img:"images/brand/instagram.png"},{a:"ติ๊กต็อก",e:"🎵",img:"images/brand/tiktok.png"},
+    {a:"ไลน์",e:"💬",img:"images/brand/line.png"},{a:"เน็ตฟลิกซ์",e:"🎬",img:"images/brand/netflix.png"},
+    {a:"สปอติฟาย",e:"🎧",img:"images/brand/spotify.png"},{a:"ไนกี้",e:"👟",img:"images/brand/nike.png"},
+    {a:"อาดิดาส",e:"👟",img:"images/brand/adidas.png"},{a:"พูม่า",e:"🐆",img:"images/brand/puma.png"},
+    {a:"ยูนิโคล่",e:"👕",img:"images/brand/uniqlo.png"},{a:"เอชแอนด์เอ็ม",e:"👚",img:"images/brand/hm.png"},
+    {a:"โตโยต้า",e:"🚗",img:"images/brand/toyota.png"},{a:"ฮอนด้า",e:"🚗",img:"images/brand/honda.png"},
+    {a:"บีเอ็มดับเบิลยู",e:"🚙",img:"images/brand/bmw.png"},{a:"เมอร์เซเดส-เบนซ์",e:"🚘",img:"images/brand/mercedes.png"},
+    {a:"เทสลา",e:"🔋",img:"images/brand/tesla.png"},{a:"เลโก้",e:"🧱",img:"images/brand/lego.png"},
+    {a:"ดิสนีย์",e:"🏰",img:"images/brand/disney.png"},{a:"ช้อปปี้",e:"🛒",img:"images/brand/shopee.png"},
+    {a:"ลาซาด้า",e:"📦",img:"images/brand/lazada.png"},{a:"แกร็บ",e:"🛵",img:"images/brand/grab.png"},
+    {a:"เซเว่นอีเลฟเว่น",e:"🏪",img:"images/brand/7-eleven.png"},{a:"โลตัส",e:"🛒",img:"images/brand/lotus.png"},
+    {a:"บิ๊กซี",e:"🛒",img:"images/brand/bigc.png"},{a:"อเมซอน",e:"📦",img:"images/brand/amazon.png"},
+    {a:"ไมโครซอฟท์",e:"🪟",img:"images/brand/microsoft.png"},{a:"เอ็กซ์ (ทวิตเตอร์)",e:"✖️",img:"images/brand/x.png"},
+    {a:"วอตส์แอป",e:"💬",img:"images/brand/whatsapp.png"},{a:"เลย์",e:"🥔",img:"images/brand/lays.png"},
+    {a:"เนสท์เล่",e:"🍫",img:"images/brand/nestle.png"},{a:"คิทแคท",e:"🍫",img:"images/brand/kitkat.png"},
+    {a:"โอรีโอ้",e:"🍪",img:"images/brand/oreo.png"},{a:"เรดบูล",e:"🐂",img:"images/brand/redbull.png"},
+    {a:"สิงห์",e:"🦁",img:"images/brand/singha.png"},{a:"ช้าง",e:"🐘",img:"images/brand/chang.png"},
+    {a:"ยามาฮ่า",e:"🏍️",img:"images/brand/yamaha.png"},{a:"ปตท.",e:"⛽",img:"images/brand/ptt.png"},
+    {a:"เอไอเอส",e:"📶",img:"images/brand/ais.png"},{a:"โซนี่",e:"🎮",img:"images/brand/sony.png"},
+    {a:"เพลย์สเตชัน",e:"🎮",img:"images/brand/playstation.png"},{a:"นินเทนโด",e:"🎮",img:"images/brand/nintendo.png"},
+    {a:"กุชชี่",e:"👜",img:"images/brand/gucci.png"},{a:"หลุยส์ วิตตอง",e:"👜",img:"images/brand/louis-vuitton.png"},
+    {a:"ชาแนล",e:"👜",img:"images/brand/chanel.png"},{a:"โรเล็กซ์",e:"⌚",img:"images/brand/rolex.png"},
+    {a:"วีซ่า",e:"💳",img:"images/brand/visa.png"},{a:"มาสเตอร์การ์ด",e:"💳",img:"images/brand/mastercard.png"},
+    {a:"อิเกีย",e:"🛋️",img:"images/brand/ikea.png"},{a:"แมคคาเฟ่",e:"☕",img:"images/brand/mccafe.png"}],
+  "การ์ตูน":[
+    {a:"โดราเอมอน",e:"🐱",img:"images/cartoon/doraemon.png"},{a:"มิกกี้เมาส์",e:"🐭",img:"images/cartoon/mickey-mouse.png"},
+    {a:"มินเนียน",e:"💛",img:"images/cartoon/minion.png"},{a:"พิคาชู",e:"⚡",img:"images/cartoon/pikachu.png"},
+    {a:"เฮลโลคิตตี้",e:"🐱",img:"images/cartoon/hello-kitty.png"},{a:"หมีพูห์",e:"🐻",img:"images/cartoon/winnie-the-pooh.png"},
+    {a:"สนูปปี้",e:"🐶",img:"images/cartoon/snoopy.png"},{a:"สปองจ์บ็อบ",e:"🧽",img:"images/cartoon/spongebob.png"},
+    {a:"โทโทโร่",e:"🌿",img:"images/cartoon/totoro.png"},{a:"ลูฟี่ (วันพีซ)",e:"🏴‍☠️",img:"images/cartoon/luffy.png"},
+    {a:"นารูโตะ",e:"🍥",img:"images/cartoon/naruto.png"},{a:"รีบอร์น",e:"👶",img:"images/cartoon/reborn.png"},
+    {a:"โคนัน",e:"🔍",img:"images/cartoon/conan.png"},{a:"ชินจัง",e:"🖍️",img:"images/cartoon/shinchan.png"},
+    {a:"เอลซ่า (โฟรเซ่น)",e:"❄️",img:"images/cartoon/elsa.png"},{a:"วู้ดดี้ (ทอยสตอรี่)",e:"🤠",img:"images/cartoon/woody.png"},
+    {a:"บัซ ไลต์เยียร์",e:"🚀",img:"images/cartoon/buzz-lightyear.png"},{a:"ซิมบ้า (ไลอ้อนคิง)",e:"🦁",img:"images/cartoon/simba.png"},
+    {a:"นีโม่",e:"🐠",img:"images/cartoon/nemo.png"},{a:"ชเร็ค",e:"👹",img:"images/cartoon/shrek.png"},
+    {a:"แบทแมน",e:"🦇",img:"images/cartoon/batman.png"},{a:"ซูเปอร์แมน",e:"🦸",img:"images/cartoon/superman.png"},
+    {a:"สไปเดอร์แมน",e:"🕷️",img:"images/cartoon/spiderman.png"},{a:"ไอรอนแมน",e:"🤖",img:"images/cartoon/ironman.png"},
+    {a:"กัปตันอเมริกา",e:"🛡️",img:"images/cartoon/captain-america.png"},{a:"ฮัลค์",e:"💚",img:"images/cartoon/hulk.png"},
+    {a:"เอลโม่",e:"🔴",img:"images/cartoon/elmo.png"},{a:"บั๊กส์ บันนี่",e:"🐰",img:"images/cartoon/bugs-bunny.png"},
+    {a:"ทอมกับเจอร์รี่",e:"🐭",img:"images/cartoon/tom-and-jerry.png"},{a:"โดนัลด์ ดั๊ก",e:"🦆",img:"images/cartoon/donald-duck.png"},
+    {a:"กูฟฟี่",e:"🐶",img:"images/cartoon/goofy.png"},{a:"บาร์บี้",e:"👱‍♀️",img:"images/cartoon/barbie.png"},
+    {a:"แพทริค",e:"⭐",img:"images/cartoon/patrick.png"},{a:"พิงกุ",e:"🐧",img:"images/cartoon/pingu.png"},
+    {a:"การ์ฟิลด์",e:"🐱",img:"images/cartoon/garfield.png"},{a:"สกูบี้ดู",e:"🐕",img:"images/cartoon/scooby-doo.png"},
+    {a:"มาริโอ้",e:"🍄",img:"images/cartoon/mario.png"},{a:"ลุยจิ",e:"🟢",img:"images/cartoon/luigi.png"},
+    {a:"ซอนิค",e:"💨",img:"images/cartoon/sonic.png"},{a:"เคอร์บี้",e:"🌸",img:"images/cartoon/kirby.png"},
+    {a:"อีวุย",e:"🦊",img:"images/cartoon/eevee.png"},{a:"คุมะมง",e:"🐻",img:"images/cartoon/kumamon.png"},
+    {a:"ริลัคคุมะ",e:"🐻",img:"images/cartoon/rilakkuma.png"},{a:"หมีบราวน์ (ไลน์)",e:"🐻",img:"images/cartoon/brown-line.png"},
+    {a:"โคนี่ (ไลน์)",e:"🐰",img:"images/cartoon/cony-line.png"},{a:"สติทช์",e:"👽",img:"images/cartoon/stitch.png"},
+    {a:"มูมิน",e:"🦛",img:"images/cartoon/moomin.png"},{a:"เปปป้าพิก",e:"🐷",img:"images/cartoon/peppa-pig.png"},
+    {a:"พาวเวอร์พัฟ",e:"👧",img:"images/cartoon/powerpuff.png"},{a:"เบ็นเท็น",e:"⌚",img:"images/cartoon/ben-10.png"},
+    {a:"แองกรี้เบิร์ด",e:"🐦",img:"images/cartoon/angry-birds.png"},{a:"ปุมบ้า",e:"🐗",img:"images/cartoon/pumba.png"},
+    {a:"ดอรามี",e:"🐱",img:"images/cartoon/dorami.png"},{a:"เคโรโระ",e:"🐸",img:"images/cartoon/keroro.png"},
+    {a:"มายเมโลดี้",e:"🐰",img:"images/cartoon/my-melody.png"},{a:"พอมปอมปูริน",e:"🐶",img:"images/cartoon/pompompurin.png"},
+    {a:"คุโรมิ",e:"😈",img:"images/cartoon/kuromi.png"},{a:"ซินนามอนโรล",e:"🐶",img:"images/cartoon/cinnamoroll.png"},
+    {a:"โอลาฟ (โฟรเซ่น)",e:"⛄",img:"images/cartoon/olaf.png"},{a:"แบดมารุ",e:"🐧",img:"images/cartoon/badtz-maru.png"}]
 };
+function imgFail(img){ const p=img&&img.parentNode; if(!p) return; p.textContent=img.getAttribute('data-fb')||'🏷️'; }
 
 /* ============ TRANSPORT (cross-device sync ผ่าน WebRTC / PeerJS) ============
    ADMIN (มือถือ) = สมองเกม ส่ง snapshot ผ่าน data channel
@@ -729,7 +841,8 @@ function snapshot(extra){
   const it=(G&&G.pool)?curItem():null;
   return Object.assign({
     type:'state',
-    phase: !G?'setup':(G.ended?'ended':'playing'),
+    phase: !G?'setup':((G.draw&&!G.draw.done)?'draw':(G.ended?'ended':'playing')),
+    draw: (G&&G.draw)?{id:G.draw.id, cat:G.draw.cat, done:G.draw.done}:null,
     item: it?{a:it.a,e:it.e||'',img:it.img||'',cat:it.cat}:null,
     reveal: G?G.revealing:false,
     names: G?G.names:{red:'ทีมส้ม',blue:'ทีมฟ้า'},
@@ -788,12 +901,13 @@ function tick(now){
   requestAnimationFrame(tick);
 }
 
+function drawing(){ return !!(G&&G.draw&&!G.draw.done); }
 function correct(side){
-  if(!G||G.ended||G.revealing||G.paused||G.countdown!=null) return;
+  if(!G||G.ended||G.revealing||G.paused||G.countdown!=null||drawing()) return;
   if(side!==G.turn) return;            // ต้องเป็นฝั่งที่ถึงตาเท่านั้น
   G.score[side]++; revealThenNext(side);
 }
-function skip(){ if(!G||G.ended||G.revealing||G.paused||G.countdown!=null) return; revealThenNext(null); }
+function skip(){ if(!G||G.ended||G.revealing||G.paused||G.countdown!=null||drawing()) return; revealThenNext(null); }
 /* ===== นับถอยหลัง 3-2-1 ก่อนเริ่ม/หลังไทเบรก ===== */
 function startCountdown(){
   if(!G) return;
@@ -886,6 +1000,15 @@ function renderDisplay(s){
     }
     oCount.classList.add('show');
   } else { renderDisplay._cd=null; oCount.classList.remove('show'); }
+  // สล็อตหมุนหมวด (เล่นครั้งเดียวต่อ draw.id)
+  const oDraw=document.getElementById('oDraw');
+  if(s.phase==='draw'&&s.draw){
+    oDraw.classList.add('show');
+    if(s.draw.id!==renderDisplay._drawId){
+      renderDisplay._drawId=s.draw.id;
+      spinReel(document.getElementById('oDrawReel'), s.draw.cat);
+    }
+  } else { renderDisplay._drawId=null; oDraw.classList.remove('show'); }
   if(s.phase==='ended'){
     const w=document.getElementById('oEndWinner');
     if(s.winner==='tie'){w.textContent='เสมอ!';w.className='big';}
@@ -914,7 +1037,7 @@ function renderDisplay(s){
   // media
   if(s.item){
     const m=document.getElementById('dMedia'), bg=document.getElementById('dBg');
-    if(s.item.img){ m.innerHTML='<img src="'+s.item.img+'" alt="">'; bg.textContent=''; }
+    if(s.item.img){ m.innerHTML='<img src="'+s.item.img+'" alt="" data-fb="'+(s.item.e||'🏷️')+'" onerror="imgFail(this)">'; bg.textContent=''; }
     else { m.textContent=s.item.e; bg.textContent=s.item.e; }
     document.getElementById('dCatTag').textContent='หมวด: '+s.item.cat;
     const ans=document.getElementById('dAnswer'); ans.textContent=s.item.a;
@@ -937,9 +1060,14 @@ function renderAdmin(s){
   document.getElementById('aBlueTime').classList.toggle('low',s.time.blue<=10000);
   document.getElementById('aRedCard').classList.toggle('turn',s.turn==='red'&&s.phase==='playing');
   document.getElementById('aBlueCard').classList.toggle('turn',s.turn==='blue'&&s.phase==='playing');
-  if(s.item){
+  if(s.phase==='draw'){
+    document.getElementById('aThumb').textContent='🎰';
+    document.getElementById('aAnswer').textContent='กำลังสุ่มหมวด…';
+    document.getElementById('aQCount').textContent='ข้อ 1';
+    // aCat ถูกหมุนโดย spinReel
+  } else if(s.item){
     const th=document.getElementById('aThumb');
-    if(s.item.img){th.innerHTML='<img src="'+s.item.img+'">';} else {th.textContent=s.item.e;}
+    if(s.item.img){th.innerHTML='<img src="'+s.item.img+'" data-fb="'+(s.item.e||'🏷️')+'" onerror="imgFail(this)">';} else {th.textContent=s.item.e;}
     document.getElementById('aCat').textContent='หมวด: '+s.item.cat;
     document.getElementById('aAnswer').textContent=s.item.a;
     document.getElementById('aQCount').textContent='ข้อ '+s.qNum;
@@ -977,12 +1105,35 @@ function buildMatches(){
   rr(BRACKET.B).forEach(p=>list.push({stage:'B',g1:p[0],g2:p[1]}));
   list.push({stage:'final',g1:null,g2:null});
   list.forEach((m,i)=>{ m.id=i; m.done=false; m.winnerGroup=null; });
+  assignTourCats(list);
   return list;
+}
+/* สุ่มหมวดให้แต่ละแมตช์ล่วงหน้า: หมวดเดียวห้ามเกิน 2 รอบ + กระจายให้ทั่ว */
+function assignTourCats(matches){
+  const cats=Object.keys(DECKS);
+  const counts={}; cats.forEach(c=>counts[c]=0);
+  matches.forEach(m=>{
+    let avail=cats.filter(c=>counts[c]<2);          // กันเกิน 2 รอบ/หมวด
+    if(!avail.length) avail=cats.slice();
+    const min=Math.min(...avail.map(c=>counts[c]));  // เลือกหมวดที่ถูกใช้น้อยสุดก่อน
+    const pref=avail.filter(c=>counts[c]===min);
+    const c=pref[Math.random()*pref.length|0];
+    counts[c]++; m.cat=c;
+  });
 }
 function saveTour(){ try{localStorage.setItem('pbgame_tour',JSON.stringify(TOUR));}catch(e){} }
 function loadTour(){ try{const s=localStorage.getItem('pbgame_tour'); return s?JSON.parse(s):null;}catch(e){return null;} }
-function initTournament(){ TOUR = loadTour() || {matches:buildMatches()}; }
-function resetTournament(){ TOUR={matches:buildMatches()}; saveTour(); renderTour(); show('tour'); }
+function initTournament(){
+  TOUR = loadTour() || {matches:buildMatches()};
+  if(!TOUR.matches.every(m=>m.cat)) assignTourCats(TOUR.matches);   // migrate ทัวร์เก่า
+  if(!TOUR.usedItems) TOUR.usedItems={};                            // {หมวด:[คำตอบที่ใช้แล้ว]}
+  saveTour();
+}
+function markUsed(cat,it){
+  if(!TOUR.usedItems[cat]) TOUR.usedItems[cat]=[];
+  if(TOUR.usedItems[cat].indexOf(it.a)<0) TOUR.usedItems[cat].push(it.a);
+}
+function resetTournament(){ TOUR={matches:buildMatches(), usedItems:{}}; saveTour(); renderTour(); show('tour'); }
 
 /* ---- standings (per สาย) ---- */
 function groupStats(say){
@@ -1088,23 +1239,55 @@ function renderMatchSetup(){
   document.querySelectorAll('#msFirstSeg button').forEach(b=>b.classList.toggle('on',b.dataset.f===MS.first));
   buildMSCats();
 }
+const MATCH_CAP=60;   // เพดานรูปต่อแมตช์
 function startTournamentMatch(){
-  const chosen=[...document.querySelectorAll('#msCats .cat-chip.on')].map(c=>c.dataset.cat);
-  if(!chosen.length){ alert('เลือกอย่างน้อย 1 หมวด'); return; }
-  let pool=[]; chosen.forEach(c=>DECKS[c].forEach(it=>pool.push(Object.assign({cat:c},it)))); shuffle(pool);
+  const m=TOUR.matches[MS.matchId];
+  const cat=m.cat;
+  const src=DECKS[cat].map(it=>Object.assign({cat},it));
+  const used=(TOUR.usedItems&&TOUR.usedItems[cat])||[];
+  let pool=src.filter(it=>used.indexOf(it.a)<0);          // ตัดรูปที่เคยใช้ทั้งทัวร์
+  if(pool.length<8) pool=src.slice();                     // เหลือน้อยเกิน → ใช้ทั้งกองกันเกมหมด
+  shuffle(pool);
+  if(pool.length>MATCH_CAP) pool=pool.slice(0,MATCH_CAP);
   const bank=MS.time*1000;
   const pRed=document.getElementById('msPlayerO').value, pBlue=document.getElementById('msPlayerB').value;
-  G={pool,idx:0,
+  G={pool,idx:0, cat,
      names:{red:pRed+' (ก.'+MS.gRed+')', blue:pBlue+' (ก.'+MS.gBlue+')'},
      score:{red:0,blue:0}, time:{red:bank,blue:bank},
      turn:MS.first, qNum:1, paused:false, revealing:false, ended:false, winner:null, endReason:'', last:performance.now(),
-     tour:{matchId:MS.matchId, gRed:MS.gRed, gBlue:MS.gBlue, pRed, pBlue}};
+     tour:{matchId:MS.matchId, gRed:MS.gRed, gBlue:MS.gBlue, pRed, pBlue},
+     draw:{id:Date.now(), cat, done:false}};
   document.getElementById('tourEndBar').classList.remove('on');
   document.getElementById('tieBar').classList.remove('on');
   show('admin');
-  pushState(true);
-  startCountdown();
-  requestAnimationFrame(tick);
+  pushState(true);     // phase 'draw' → ทั้งสองจอเริ่มหมุนสล็อต
+  runDraw(cat);
+}
+const DRAW_MS=3200;
+function runDraw(cat){
+  spinReel(document.getElementById('aCat'), cat);   // หมุนบนจอแอดมิน
+  if(G&&G._dt) clearTimeout(G._dt);
+  G._dt=setTimeout(()=>{
+    if(!G) return;
+    G.draw.done=true; G._dt=null;
+    pushState(true);
+    startCountdown();
+    requestAnimationFrame(tick);
+  }, DRAW_MS);
+}
+/* สล็อตหมุนชื่อหมวด แล้วหยุดที่ target */
+function spinReel(el, target, onDone){
+  if(!el) return;
+  const cats=Object.keys(DECKS);
+  let elapsed=0, delay=55;
+  el.classList.remove('reel-hit');
+  const step=()=>{
+    el.textContent='🎲 '+cats[Math.random()*cats.length|0];
+    elapsed+=delay;
+    if(elapsed<2300){ delay=55+(elapsed/2300)*210; setTimeout(step,delay); }
+    else { el.textContent='🎯 '+target; el.classList.add('reel-hit'); if(onDone) setTimeout(onDone,600); }
+  };
+  step();
 }
 function finishMatch(){
   if(!G||!G.ended||!G.tour) return;
@@ -1117,6 +1300,8 @@ function finishMatch(){
   m.winnerGroup = G.winner==='red'?t.gRed:t.gBlue;
   m.loserGroup  = G.winner==='red'?t.gBlue:t.gRed;
   m.endReason=G.endReason;
+  const shown=Math.min(G.idx+1, G.pool.length);          // จำรูปที่โชว์ไปแล้ว → ไม่ซ้ำทั้งทัวร์
+  for(let i=0;i<shown;i++) markUsed(G.cat, G.pool[i]);
   saveTour();
   document.getElementById('tourEndBar').classList.remove('on');
   document.getElementById('tieBar').classList.remove('on');
