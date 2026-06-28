@@ -584,8 +584,9 @@
 
     <div class="field" style="margin-top:14px"><label style="display:block;font-size:13px;opacity:.7;margin-bottom:6px">เวลาต่อฝั่ง</label>
       <div class="seg" id="msTimeSeg">
+        <button data-t="40" class="on" onclick="pickTime(40)">40 วินาที</button>
         <button data-t="45" onclick="pickTime(45)">45 วินาที</button>
-        <button data-t="50" class="on" onclick="pickTime(50)">50 วินาที</button>
+        <button data-t="50" onclick="pickTime(50)">50 วินาที</button>
       </div>
     </div>
 
@@ -929,13 +930,15 @@ function startCountdown(){
 function revealThenNext(flashSide){
   G.revealing=true;
   pushState(true, flashSide?{flash:flashSide}:{});
+  const delay = flashSide?350:900;   // ตอบถูก: สลับตา+เริ่มนับไวๆ / ข้าม: โชว์เฉลยให้อ่านนานหน่อย
   setTimeout(()=>{
     if(!G) return;
     G.idx++; G.qNum++;
     if(flashSide) G.turn=G.turn==='red'?'blue':'red';   // สลับตาเฉพาะตอนตอบถูก; ข้าม=ทีมเดิมเล่นต่อจนกว่าจะถูก
     G.revealing=false;
+    G.last=performance.now();                            // รีเซ็ตฐานเวลา → ตาถัดไปนับทันที ไม่หน่วง
     pushState(true);
-  },900);
+  },delay);
 }
 function togglePause(){ if(!G||G.ended) return; G.paused=!G.paused;
   const lbl=G.paused?'▶ เล่นต่อ':'⏸ พัก';
@@ -1220,7 +1223,7 @@ function openMatchSetup(matchId){
     if(!wa||!wb){ alert('รอบสายยังไม่ครบ'); return; }
     m.g1=wa.g; m.g2=wb.g;
   }
-  MS={matchId, gRed:m.g1, gBlue:m.g2, time:50, first:'red'};
+  MS={matchId, gRed:m.g1, gBlue:m.g2, time:40, first:'red'};
   renderMatchSetup();
   show('matchSetup');
   drawMatchCat(m.cat);            // สุ่มหมวดให้เห็นก่อน แล้วค่อยเลือกตัวแทน
@@ -1280,9 +1283,10 @@ function startTournamentMatch(){
   const cat=m.cat;
   const src=DECKS[cat].map(it=>Object.assign({cat},it));
   const used=(TOUR.usedItems&&TOUR.usedItems[cat])||[];
-  let pool=src.filter(it=>used.indexOf(it.a)<0);          // ตัดรูปที่เคยใช้ทั้งทัวร์
-  if(pool.length<8) pool=src.slice();                     // เหลือน้อยเกิน → ใช้ทั้งกองกันเกมหมด
-  shuffle(pool);
+  let fresh=src.filter(it=>used.indexOf(it.a)<0);         // รูปที่ยังไม่เคยใช้ทั้งทัวร์
+  let rest =src.filter(it=>used.indexOf(it.a)>=0);        // รูปที่ใช้ไปแล้ว (เก็บไว้เติมท้าย)
+  shuffle(fresh); shuffle(rest);
+  let pool=fresh.concat(rest);   // รูปสดก่อน แล้วค่อยเติมของเก่า → ทั้งแมตช์ไม่มีทางซ้ำ (เต็มเด็ค 60)
   if(pool.length>MATCH_CAP) pool=pool.slice(0,MATCH_CAP);
   const bank=MS.time*1000;
   const pRed=document.getElementById('msPlayerO').value, pBlue=document.getElementById('msPlayerB').value;
