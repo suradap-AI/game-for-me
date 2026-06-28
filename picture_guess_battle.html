@@ -209,6 +209,35 @@
   #oDraw .draw-sub{font-size:16px; opacity:.7; letter-spacing:1px;}
   @keyframes reelHit{0%{transform:scale(.6); opacity:.2;}45%{transform:scale(1.18); opacity:1;}100%{transform:scale(1);}}
 
+  /* bracket draw overlay */
+  #oBracket{position:fixed; inset:0; z-index:50; display:none; flex-direction:column; align-items:center; justify-content:center; gap:22px;
+    background:radial-gradient(circle at 50% 32%, #16214a, #050b1c); padding:20px;}
+  #oBracket.show{display:flex;}
+  #oBracket .brk-title{font-size:clamp(22px,4vw,30px); font-weight:900; letter-spacing:6px; color:var(--gold); text-shadow:0 0 30px rgba(244,196,59,.6);}
+  #oBracket .brk-cols{display:flex; align-items:center; gap:clamp(10px,4vw,46px);}
+  #oBracket .brk-col{min-width:min(38vw,310px);}
+  #oBracket .brk-h{text-align:center; font-size:clamp(16px,2.4vw,20px); font-weight:800; letter-spacing:3px; margin-bottom:12px; opacity:.9;}
+  #oBracket .brk-A .brk-h{color:#ffb27a;} #oBracket .brk-B .brk-h{color:#7ab8ff;}
+  #oBracket .brk-slots{display:flex; flex-direction:column; gap:12px;}
+  #oBracket .brk-slot{border-radius:16px; padding:13px 16px; min-height:52px; display:flex; flex-direction:column; justify-content:center;
+    text-align:center; background:rgba(255,255,255,.05); border:1.5px dashed rgba(255,255,255,.18);}
+  #oBracket .brk-slot .brk-q{font-size:24px; font-weight:900; opacity:.28;}
+  #oBracket .brk-slot.filled{border-style:solid;}
+  #oBracket .brk-slot.filled.red{background:linear-gradient(135deg, rgba(255,120,40,.30), rgba(255,120,40,.10)); border-color:rgba(255,140,60,.7);}
+  #oBracket .brk-slot.filled.blue{background:linear-gradient(135deg, rgba(40,120,255,.30), rgba(40,120,255,.10)); border-color:rgba(80,150,255,.7);}
+  #oBracket .brk-slot.filled.gold{background:linear-gradient(135deg, rgba(244,196,59,.30), rgba(244,196,59,.08)); border-color:rgba(244,196,59,.75);}
+  #oBracket .brk-slot .brk-g{font-size:clamp(15px,2vw,19px); font-weight:800;}
+  #oBracket .brk-slot .brk-g.brk-spin{opacity:.55; filter:blur(.4px);}
+  #oBracket .brk-vs2{opacity:.5; font-weight:600; font-size:.78em; margin:0 5px;}
+  #oBracket .brk-final{width:min(80vw,640px);}
+  #oBracket .brk-final .brk-h2{text-align:center; font-size:13px; letter-spacing:2px; opacity:.55; margin-bottom:8px;}
+  #oBracket .brk-slot.pop{animation:brkPop .5s cubic-bezier(.2,1.4,.4,1);}
+  @keyframes brkPop{0%{transform:scale(.55) translateY(12px); opacity:0;}60%{transform:scale(1.08);}100%{transform:scale(1); opacity:1;}}
+  #oBracket .brk-sub{font-size:15px; opacity:.7; letter-spacing:1px; text-align:center;}
+  #oBracket .brk-close{margin-top:4px; padding:10px 30px; border-radius:30px; border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.08); color:#fff; font-size:15px; font-weight:700; cursor:pointer;}
+  #oBracket .brk-close:hover{background:rgba(255,255,255,.16);}
+
   /* solo controls */
   .controls{display:flex; gap:10px; padding:12px 14px; background:#06101f; justify-content:center; flex-wrap:wrap;}
   .controls button{padding:14px 22px; font-size:17px; font-weight:800; border:none; border-radius:12px;
@@ -554,6 +583,7 @@
     <div class="ti">🏆 ทัวร์นาเมนต์ <span class="vs">ส้ม vs ฟ้า</span></div>
     <span class="status on" id="tourConn">เชื่อมจอแล้ว ✓</span>
   </div>
+  <div id="tourDrawWrap" style="text-align:center;margin:2px 0 8px"></div>
   <div class="says" id="tourSays"></div>
   <div style="font-size:14px;opacity:.7;margin-top:4px">ตารางแมตช์</div>
   <table class="mtable"><thead><tr><th>สาย</th><th>คู่แข่ง</th><th>ผล</th></tr></thead>
@@ -561,6 +591,18 @@
   <div id="tourNextWrap"></div>
   <div class="back" style="text-align:center;opacity:.5;font-size:12px;cursor:pointer" onclick="if(confirm('เริ่มทัวร์ใหม่ทั้งหมด? ผลทุกแมตช์จะถูกล้าง'))resetTournament()">↻ รีเซ็ตทัวร์นาเมนต์</div>
 </section>
+
+<!-- ============ BRACKET DRAW OVERLAY (โชว์ขึ้นจอใหญ่/ผู้เล่น) ============ -->
+<div id="oBracket">
+  <div class="brk-title">🎲 จับคู่แมตช์</div>
+  <div class="brk-cols">
+    <div class="brk-col brk-A"><div class="brk-h">สาย A</div><div class="brk-slots" id="brkA"></div></div>
+    <div class="brk-col brk-B"><div class="brk-h">สาย B</div><div class="brk-slots" id="brkB"></div></div>
+  </div>
+  <div class="brk-final" id="brkFinal"></div>
+  <div class="brk-sub" id="brkSub">กำลังจับคู่…</div>
+  <button class="brk-close" id="brkClose" onclick="closeBracket()">ปิด</button>
+</div>
 
 <!-- ============ MATCH SETUP (admin) ============ -->
 <section id="matchSetup" class="screen center">
@@ -771,7 +813,7 @@ function newPlayerPeer(){
   peer.on('connection',c=>{
     conn=c;
     c.on('open',()=>playerOverlay('connected'));
-    c.on('data',snap=>{ if(snap&&snap.type!=='hello') renderDisplay(snap); });
+    c.on('data',snap=>{ if(!snap||snap.type==='hello')return; if(snap.type==='bracket') renderBracketReveal(snap); else renderDisplay(snap); });
     c.on('close',()=>playerOverlay('code'));
   });
 }
@@ -1101,7 +1143,7 @@ const GROUPS = {
   6:{members:['ศร','ไอซ์','กันต์','เหมา']},
   7:{members:['นัด','ภูมิ','เอิท','บีบี']},
 };
-const BRACKET = { A:[6,3,7], B:[4,5,1] };
+let BRACKET = { A:[6,3,7], B:[4,5,1] };   // ค่าเริ่มต้น; ถ้าจับสายแล้วอ่านจาก TOUR.bracket
 let TOUR=null, MS=null;
 
 function gName(g){ return 'กลุ่ม '+g; }
@@ -1136,6 +1178,8 @@ function saveTour(){ try{localStorage.setItem('pbgame_tour',JSON.stringify(TOUR)
 function loadTour(){ try{const s=localStorage.getItem('pbgame_tour'); return s?JSON.parse(s):null;}catch(e){return null;} }
 function initTournament(){
   TOUR = loadTour() || {matches:buildMatches()};
+  if(TOUR.bracket) BRACKET = TOUR.bracket;        // ใช้สายที่จับไว้
+  else { TOUR.bracket = BRACKET; TOUR.drawn = false; }   // ทัวร์เก่า → ตั้งค่าเริ่มต้น
   if(!TOUR.matches.every(m=>m.cat)) assignTourCats(TOUR.matches);   // migrate ทัวร์เก่า
   if(!TOUR.usedItems) TOUR.usedItems={};                            // {หมวด:[คำตอบที่ใช้แล้ว]}
   saveTour();
@@ -1144,7 +1188,78 @@ function markUsed(cat,it){
   if(!TOUR.usedItems[cat]) TOUR.usedItems[cat]=[];
   if(TOUR.usedItems[cat].indexOf(it.a)<0) TOUR.usedItems[cat].push(it.a);
 }
-function resetTournament(){ TOUR={matches:buildMatches(), usedItems:{}}; saveTour(); renderTour(); show('tour'); }
+function resetTournament(){ TOUR={matches:buildMatches(), usedItems:{}, bracket:BRACKET, drawn:false}; saveTour(); renderTour(); show('tour'); }
+
+/* ---- จับคู่แมตช์ (ล็อกผลไว้ก่อน · โชว์ขึ้นจอเหมือนสุ่ม) ---- */
+let _brTimer=null;
+function tourStarted(){ return !!(TOUR && TOUR.matches.some(m=>m.done)); }
+/* เผยคู่แมตช์ทีละแถว: สาย A 3 คู่ / สาย B 3 คู่ สลับกัน แล้วปิดท้ายรอบชิง */
+function playBracketReveal(){
+  if(_brTimer){ clearTimeout(_brTimer); _brTimer=null; }
+  const fixA=TOUR.matches.filter(m=>m.stage==='A').map(m=>[m.g1,m.g2]);
+  const fixB=TOUR.matches.filter(m=>m.stage==='B').map(m=>[m.g1,m.g2]);
+  const total=fixA.length+fixB.length+1;     // +รอบชิง
+  const drawId=Date.now();
+  const send=(shown)=>broadcastBracket({type:'bracket',phase:'bracketDraw',drawId,fixA,fixB,shown,total});
+  send(0);
+  let shown=0;
+  const step=()=>{ shown++; send(shown);
+    if(shown<total){ _brTimer=setTimeout(step,950); }
+    else { _brTimer=null; renderTour(); } };
+  _brTimer=setTimeout(step,650);
+}
+function closeBracket(){
+  if(_brTimer){ clearTimeout(_brTimer); _brTimer=null; }
+  broadcastBracket({type:'bracket',phase:'bracketHide'});
+}
+function broadcastBracket(snap){
+  renderBracketReveal(snap);                               // จอแอดมิน/จอเดี่ยวเห็นทันที
+  if(ROLE==='admin' && conn && conn.open){ try{conn.send(snap);}catch(e){} }
+}
+function brkSlot(){ const d=document.createElement('div'); d.className='brk-slot'; d.innerHTML='<div class="brk-q">?</div>'; return d; }
+/* สุ่มเลขกลุ่มหลอกตา ~0.5 วิ แล้วลงผลจริง (ทำเหมือนสุ่ม แต่ผลล็อก) */
+function spinSlot(slot, finalHTML, color){
+  slot.classList.add('filled'); if(color) slot.classList.add(color);
+  const gk=Object.keys(GROUPS); let n=0;
+  const iv=setInterval(()=>{
+    const a=gk[Math.random()*gk.length|0], b=gk[Math.random()*gk.length|0];
+    slot.innerHTML='<div class="brk-g brk-spin">กลุ่ม '+a+' <span class="brk-vs2">พบ</span> กลุ่ม '+b+'</div>';
+    if(++n>=7){ clearInterval(iv); slot.innerHTML=finalHTML; void slot.offsetWidth; slot.classList.add('pop'); }
+  },65);
+}
+function renderBracketReveal(s){
+  const ov=document.getElementById('oBracket'); if(!ov) return;
+  if(!s || s.phase==='bracketHide'){ ov.classList.remove('show'); renderBracketReveal._id=null; return; }
+  ov.classList.add('show');
+  document.getElementById('brkClose').style.display=(ROLE==='admin')?'block':'none';
+  const A=document.getElementById('brkA'), B=document.getElementById('brkB'), F=document.getElementById('brkFinal');
+  const fixA=s.fixA||[], fixB=s.fixB||[], nA=fixA.length, nB=fixB.length;
+  if(s.drawId!==renderBracketReveal._id){
+    renderBracketReveal._id=s.drawId; renderBracketReveal._filled={};
+    A.innerHTML=''; B.innerHTML=''; F.innerHTML='<div class="brk-h2">รอบชิงชนะเลิศ</div>';
+    for(let i=0;i<nA;i++) A.appendChild(brkSlot());
+    for(let i=0;i<nB;i++) B.appendChild(brkSlot());
+    F.appendChild(brkSlot());
+  }
+  // ลำดับเผย: สลับ A/B ทีละคู่ แล้วปิดท้ายรอบชิง
+  const order=[]; const mx=Math.max(nA,nB);
+  for(let i=0;i<mx;i++){ if(i<nA) order.push(['A',i]); if(i<nB) order.push(['B',i]); }
+  order.push(['F',0]);
+  const filled=renderBracketReveal._filled;
+  for(let i=0;i<s.shown && i<order.length;i++){
+    const tag=order[i][0], idx=order[i][1], key=tag+idx;
+    if(filled[key]) continue; filled[key]=1;
+    if(tag==='F'){
+      spinSlot(F.children[1], '<div class="brk-g">🏆 ที่ 1 สาย A <span class="brk-vs2">พบ</span> ที่ 1 สาย B</div>', 'gold');
+    } else {
+      const col=(tag==='A')?A:B, pair=(tag==='A'?fixA:fixB)[idx];
+      const html='<div class="brk-g">'+gName(pair[0])+' <span class="brk-vs2">พบ</span> '+gName(pair[1])+'</div>';
+      spinSlot(col.children[idx], html, tag==='A'?'red':'blue');
+    }
+  }
+  document.getElementById('brkSub').textContent=(s.shown>=(s.total||order.length))
+    ? 'จับคู่ครบแล้ว — รวม 7 แมตช์ (สายละ 3 คู่ + รอบชิง 1)' : 'กำลังจับคู่…';
+}
 
 /* ---- standings (per สาย) ---- */
 function groupStats(say){
@@ -1169,6 +1284,12 @@ function sayWinner(say){
 
 /* ---- render dashboard ---- */
 function renderTour(){
+  const dw=document.getElementById('tourDrawWrap');
+  if(dw){
+    dw.innerHTML = tourStarted()
+      ? ''
+      : '<button class="startbtn" style="max-width:300px;margin:0 auto" onclick="playBracketReveal()">🎲 จับคู่แมตช์ (โชว์ขึ้นจอ)</button>';
+  }
   const says=document.getElementById('tourSays'); says.innerHTML='';
   ['A','B'].forEach(s=>{
     const st=groupStats(s), complete=sayComplete(s), win=sayWinner(s);
