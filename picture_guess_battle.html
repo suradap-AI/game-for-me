@@ -913,16 +913,18 @@ function skip(){ if(!G||G.ended||G.revealing||G.paused||G.countdown!=null||drawi
 function startCountdown(){
   if(!G) return;
   if(G._cdt) clearTimeout(G._cdt);
+  G.countdown='';        // ช่วงหน่วงนำ: เฟรซนาฬิกาไว้ก่อน เลขยังไม่โผล่
+  pushState(true);
   const seq=[3,2,1,0];   // 0 = "เริ่ม!"
   let i=0;
   const step=()=>{
     if(!G) return;
     G.countdown=seq[i]; i++;
     pushState(true);
-    if(i<seq.length){ G._cdt=setTimeout(step,1000); }
-    else { G._cdt=setTimeout(()=>{ if(!G)return; G.countdown=null; G._cdt=null; G.last=performance.now(); pushState(true); },800); }
+    if(i<seq.length){ G._cdt=setTimeout(step,1300); }   // นับช้าลง (1.3 วิ/เลข)
+    else { G._cdt=setTimeout(()=>{ if(!G)return; G.countdown=null; G._cdt=null; G.last=performance.now(); pushState(true); },1000); }
   };
-  step();
+  G._cdt=setTimeout(step,800);   // เลข 3 โผล่ช้าลงนิดนึง
 }
 function revealThenNext(flashSide){
   G.revealing=true;
@@ -991,7 +993,7 @@ function renderDisplay(s){
   oEnd.classList.toggle('show', s.phase==='ended');
   // countdown 3-2-1 (เปลี่ยนเฉพาะตอนเลขเปลี่ยน เพื่อไม่ให้แอนิเมชันรีเซ็ตทุกเฟรม)
   const oCount=document.getElementById('oCount');
-  if(s.countdown!=null){
+  if(s.countdown!=null&&s.countdown!==''){
     if(s.countdown!==renderDisplay._cd){
       renderDisplay._cd=s.countdown;
       const n=document.getElementById('oCountNum');
@@ -1086,7 +1088,7 @@ function renderAdmin(s){
     document.getElementById('aAnswer').textContent = s.winner==='tie'?'เสมอ!':('🏆 '+s.names[s.winner]+' ชนะ');
     document.getElementById('aCat').textContent=s.endReason;
   } else if(s.countdown!=null){
-    document.getElementById('aCat').textContent = s.countdown===0?'⏳ เริ่ม!':('⏳ เตรียมตัว... เริ่มใน '+s.countdown);
+    document.getElementById('aCat').textContent = s.countdown===''?'⏳ เตรียมตัว...':(s.countdown===0?'⏳ เริ่ม!':('⏳ เตรียมตัว... เริ่มใน '+s.countdown));
   }
 }
 
